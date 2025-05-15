@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework> <!-- Or net6.0, net7.0 -->
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Exe</OutputType> <!-- Important for Windows Service -->
+    <RootNamespace>UsbDlpAgent</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- For Windows Service hosting -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+    <!-- For WMI access -->
+    <PackageReference Include="System.Management" Version="8.0.0" />
+  </ItemGroup>
+
+   <ItemGroup>
+    <!-- Thêm FrameworkReference cho ASP.NET Core -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\UsbDlpAgent.SharedModels\UsbDlpAgent.SharedModels.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>
