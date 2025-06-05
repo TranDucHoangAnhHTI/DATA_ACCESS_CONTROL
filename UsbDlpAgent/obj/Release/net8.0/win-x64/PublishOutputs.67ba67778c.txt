@@ -1,0 +1,16 @@
+C:\UsbDlpAgent\publish_service\UsbDlpAgent.exe
+C:\UsbDlpAgent\publish_service\appsettings.Development.json
+C:\UsbDlpAgent\publish_service\appsettings.json
+C:\UsbDlpAgent\publish_service\UsbDlpAgent.dll
+C:\UsbDlpAgent\publish_service\UsbDlpAgent.deps.json
+C:\UsbDlpAgent\publish_service\UsbDlpAgent.runtimeconfig.json
+C:\UsbDlpAgent\publish_service\UsbDlpAgent.pdb
+C:\UsbDlpAgent\publish_service\Microsoft.AspNetCore.Http.Connections.Client.dll
+C:\UsbDlpAgent\publish_service\Microsoft.AspNetCore.SignalR.Client.dll
+C:\UsbDlpAgent\publish_service\Microsoft.AspNetCore.SignalR.Client.Core.dll
+C:\UsbDlpAgent\publish_service\Microsoft.Extensions.Hosting.WindowsServices.dll
+C:\UsbDlpAgent\publish_service\System.CodeDom.dll
+C:\UsbDlpAgent\publish_service\System.Management.dll
+C:\UsbDlpAgent\publish_service\System.ServiceProcess.ServiceController.dll
+C:\UsbDlpAgent\publish_service\UsbDlpAgent.SharedModels.dll
+C:\UsbDlpAgent\publish_service\UsbDlpAgent.SharedModels.pdb

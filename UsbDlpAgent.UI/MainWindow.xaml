@@ -5,65 +5,77 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UsbDlpAgent.UI"
         xmlns:models="clr-namespace:UsbDlpAgent.SharedModels;assembly=UsbDlpAgent.SharedModels"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="USB DLP Agent Monitor"
-        Height="600"
-        Width="1000"
+        Title="USB DLP Agent Monitor - Giám sát tác nhân"
+        Height="700"
+        Width="1200"
         Loaded="Window_Loaded"
-        Closing="Window_Closing">
-    <Grid Margin="10">
+        Closing="Window_Closing"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal"
-                    Grid.Row="0"
-                    Margin="0,0,0,10">
-            <TextBlock Text="Event Log"
-                       FontSize="18"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"/>
-            <Button Content="Request History"
-                    Margin="20,0,0,0"
-                    Padding="5"
-                    Click="RequestHistoryButton_Click"/>
-        </StackPanel>
+        <materialDesign:ColorZone Mode="PrimaryMid"
+                                  Grid.Row="0"
+                                  Padding="16">
+            <DockPanel>
+                <TextBlock Text="GIÁM SÁT TÁC NHÂN USB DLP"
+                           VerticalAlignment="Center"
+                           FontSize="18"
+                           FontWeight="Medium"
+                           Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"/>
+                <Button x:Name="LogoutButton"
+                        Content="Đăng xuất"
+                        DockPanel.Dock="Right"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                        Click="LogoutButton_Click"/>
+                <TextBlock Text="Người dùng: admin"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right"
+                           Margin="0,0,20,0"
+                           DockPanel.Dock="Right"
+                           Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"/>
+            </DockPanel>
+        </materialDesign:ColorZone>
 
+        <TabControl Grid.Row="1"
+                    Margin="5"
+                    Style="{StaticResource MaterialDesignTabControl}">
+            <TabItem Style="{StaticResource MaterialDesignTabItem}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="EyeCheckOutline"
+                                                 Margin="0,0,8,0"/>
+                        <TextBlock Text="Theo dõi Thời gian thực"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <local:RealtimeEventsView x:Name="RealtimeViewInstance"/>
+            </TabItem>
 
-        <ListView Grid.Row="1"
-                  Name="EventListView">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Timestamp"
-                                    Width="150">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Timestamp, StringFormat='yyyy-MM-dd HH:mm:ss.fff'}"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Type"
-                                    Width="100"
-                                    DisplayMemberBinding="{Binding Type}"/>
-                    <GridViewColumn Header="File Path"
-                                    Width="350"
-                                    DisplayMemberBinding="{Binding FilePath}"/>
-                    <GridViewColumn Header="Old File Path"
-                                    Width="250"
-                                    DisplayMemberBinding="{Binding OldFilePath}"/>
-                    <GridViewColumn Header="Drive"
-                                    Width="70"
-                                    DisplayMemberBinding="{Binding Drive}"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
+            <TabItem Style="{StaticResource MaterialDesignTabItem}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="History"
+                                                 Margin="0,0,8,0"/>
+                        <TextBlock Text="Xem lại Lịch sử"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <local:HistoryView x:Name="HistoryViewInstance"/>
+            </TabItem>
+        </TabControl>
 
         <StatusBar Grid.Row="2">
             <StatusBarItem>
                 <TextBlock Name="ConnectionStatusText"
-                           Text="Status: Initializing..."/>
+                           Text="Trạng thái: Đang khởi tạo..."/>
             </StatusBarItem>
         </StatusBar>
     </Grid>

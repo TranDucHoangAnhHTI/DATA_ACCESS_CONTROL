@@ -1,0 +1,130 @@
+2025-06-05 16:14:55.601 [INF] Starting application...
+2025-06-05 16:14:55.620 [DBG] Application startup arguments: 
+2025-06-05 16:14:55.621 [INF] Creating LoginWindow...
+2025-06-05 16:14:55.635 [INF] Initializing LoginWindow...
+2025-06-05 16:14:55.737 [ERR] Error initializing LoginWindow
+System.Windows.Markup.XamlParseException: 'Provide value on 'System.Windows.StaticResourceExtension' threw an exception.' Line number '24' and line position '22'.
+ ---> System.Exception: Cannot find resource named 'MaterialDesignFloatingHintTextBox'. Resource names are case sensitive.
+   at System.Windows.StaticResourceExtension.ProvideValueInternal(IServiceProvider serviceProvider, Boolean allowDeferredReference)
+   at MS.Internal.Xaml.Runtime.ClrObjectRuntime.CallProvideValue(MarkupExtension me, IServiceProvider serviceProvider)
+   --- End of inner exception stack trace ---
+   at System.Windows.Markup.XamlReader.RewrapException(Exception e, IXamlLineInfo lineInfo, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.LoadBaml(XamlReader xamlReader, Boolean skipJournaledProperties, Object rootObject, XamlAccessLevel accessLevel, Uri baseUri)
+   at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
+   at System.Windows.Application.LoadComponent(Object component, Uri resourceLocator)
+   at UsbDlpAgent.UI.LoginWindow.InitializeComponent() in C:\UsbDlpAgent\UsbDlpAgent.UI\LoginWindow.xaml:line 1
+   at UsbDlpAgent.UI.LoginWindow..ctor() in C:\UsbDlpAgent\UsbDlpAgent.UI\LoginWindow.xaml.cs:line 17
+2025-06-05 16:16:01.205 [DBG] LoginWindow created successfully
+2025-06-05 16:16:01.205 [INF] Showing LoginWindow...
+2025-06-05 16:16:01.205 [INF] LoginWindow.Show() called successfully
+2025-06-05 16:16:01.206 [INF] Application is shutting down with exit code: 0
+2025-06-05 16:28:24.410 [INF] Starting application...
+2025-06-05 16:28:24.427 [DBG] Application startup arguments: 
+2025-06-05 16:28:24.428 [INF] Creating LoginWindow...
+2025-06-05 16:28:24.439 [INF] Initializing LoginWindow...
+2025-06-05 16:28:24.507 [ERR] Error initializing LoginWindow
+System.Windows.Markup.XamlParseException: 'Provide value on 'System.Windows.StaticResourceExtension' threw an exception.' Line number '21' and line position '24'.
+ ---> System.Exception: Cannot find resource named 'MaterialDesignHeadline5TextBlock'. Resource names are case sensitive.
+   at System.Windows.StaticResourceExtension.ProvideValueInternal(IServiceProvider serviceProvider, Boolean allowDeferredReference)
+   at MS.Internal.Xaml.Runtime.ClrObjectRuntime.CallProvideValue(MarkupExtension me, IServiceProvider serviceProvider)
+   --- End of inner exception stack trace ---
+   at System.Windows.Markup.XamlReader.RewrapException(Exception e, IXamlLineInfo lineInfo, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.LoadBaml(XamlReader xamlReader, Boolean skipJournaledProperties, Object rootObject, XamlAccessLevel accessLevel, Uri baseUri)
+   at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
+   at System.Windows.Application.LoadComponent(Object component, Uri resourceLocator)
+   at UsbDlpAgent.UI.LoginWindow.InitializeComponent() in C:\UsbDlpAgent\UsbDlpAgent.UI\LoginWindow.xaml:line 1
+   at UsbDlpAgent.UI.LoginWindow..ctor() in C:\UsbDlpAgent\UsbDlpAgent.UI\LoginWindow.xaml.cs:line 17
+2025-06-05 16:30:23.990 [DBG] LoginWindow created successfully
+2025-06-05 16:30:23.990 [INF] Showing LoginWindow...
+2025-06-05 16:30:23.991 [INF] LoginWindow.Show() called successfully
+2025-06-05 16:30:23.992 [INF] Application is shutting down with exit code: 0
+2025-06-05 16:30:30.797 [INF] Starting application...
+2025-06-05 16:30:30.816 [DBG] Application startup arguments: 
+2025-06-05 16:30:30.818 [INF] Creating LoginWindow...
+2025-06-05 16:30:30.830 [INF] Initializing LoginWindow...
+2025-06-05 16:30:30.942 [DBG] LoginWindow components initialized
+2025-06-05 16:30:30.944 [DBG] UsernameTextBox focused
+2025-06-05 16:30:30.944 [DBG] LoginWindow created successfully
+2025-06-05 16:30:30.944 [INF] Showing LoginWindow...
+2025-06-05 16:30:31.009 [DBG] LoginWindow source initialized
+2025-06-05 16:30:31.098 [INF] LoginWindow.Show() called successfully
+2025-06-05 16:30:56.914 [INF] Login attempt...
+2025-06-05 16:30:56.914 [DBG] Validating credentials...
+2025-06-05 16:30:56.914 [WRN] Login failed: Invalid credentials
+2025-06-05 16:31:03.785 [INF] Login attempt...
+2025-06-05 16:31:03.785 [DBG] Validating credentials...
+2025-06-05 16:31:03.785 [INF] Login successful, opening MainWindow
+2025-06-05 16:31:03.785 [INF] Initializing MainWindow...
+2025-06-05 16:31:03.790 [ERR] Error initializing MainWindow
+System.Windows.Markup.XamlParseException: 'Provide value on 'System.Windows.StaticResourceExtension' threw an exception.' Line number '36' and line position '25'.
+ ---> System.Exception: Cannot find resource named 'MaterialDesignFlatButton'. Resource names are case sensitive.
+   at System.Windows.StaticResourceExtension.ProvideValueInternal(IServiceProvider serviceProvider, Boolean allowDeferredReference)
+   at MS.Internal.Xaml.Runtime.ClrObjectRuntime.CallProvideValue(MarkupExtension me, IServiceProvider serviceProvider)
+   --- End of inner exception stack trace ---
+   at System.Windows.Markup.XamlReader.RewrapException(Exception e, IXamlLineInfo lineInfo, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.LoadBaml(XamlReader xamlReader, Boolean skipJournaledProperties, Object rootObject, XamlAccessLevel accessLevel, Uri baseUri)
+   at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
+   at System.Windows.Application.LoadComponent(Object component, Uri resourceLocator)
+   at UsbDlpAgent.UI.MainWindow.InitializeComponent() in C:\UsbDlpAgent\UsbDlpAgent.UI\MainWindow.xaml:line 1
+   at UsbDlpAgent.UI.MainWindow..ctor() in C:\UsbDlpAgent\UsbDlpAgent.UI\MainWindow.xaml.cs:line 28
+2025-06-05 16:31:46.525 [ERR] Error during login process
+System.Windows.Markup.XamlParseException: 'Provide value on 'System.Windows.StaticResourceExtension' threw an exception.' Line number '36' and line position '25'.
+ ---> System.Exception: Cannot find resource named 'MaterialDesignFlatButton'. Resource names are case sensitive.
+   at System.Windows.StaticResourceExtension.ProvideValueInternal(IServiceProvider serviceProvider, Boolean allowDeferredReference)
+   at MS.Internal.Xaml.Runtime.ClrObjectRuntime.CallProvideValue(MarkupExtension me, IServiceProvider serviceProvider)
+   --- End of inner exception stack trace ---
+   at System.Windows.Markup.XamlReader.RewrapException(Exception e, IXamlLineInfo lineInfo, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.LoadBaml(XamlReader xamlReader, Boolean skipJournaledProperties, Object rootObject, XamlAccessLevel accessLevel, Uri baseUri)
+   at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
+   at System.Windows.Application.LoadComponent(Object component, Uri resourceLocator)
+   at UsbDlpAgent.UI.MainWindow.InitializeComponent() in C:\UsbDlpAgent\UsbDlpAgent.UI\MainWindow.xaml:line 1
+   at UsbDlpAgent.UI.MainWindow..ctor() in C:\UsbDlpAgent\UsbDlpAgent.UI\MainWindow.xaml.cs:line 28
+   at UsbDlpAgent.UI.LoginWindow.LoginButton_Click(Object sender, RoutedEventArgs e) in C:\UsbDlpAgent\UsbDlpAgent.UI\LoginWindow.xaml.cs:line 43
+2025-06-05 16:35:20.990 [INF] Starting application...
+2025-06-05 16:35:21.007 [DBG] Application startup arguments: 
+2025-06-05 16:35:21.008 [INF] Creating LoginWindow...
+2025-06-05 16:35:21.020 [INF] Initializing LoginWindow...
+2025-06-05 16:35:21.120 [DBG] LoginWindow components initialized
+2025-06-05 16:35:21.121 [DBG] UsernameTextBox focused
+2025-06-05 16:35:21.121 [DBG] LoginWindow created successfully
+2025-06-05 16:35:21.121 [INF] Showing LoginWindow...
+2025-06-05 16:35:21.178 [DBG] LoginWindow source initialized
+2025-06-05 16:35:21.267 [INF] LoginWindow.Show() called successfully
+2025-06-05 16:35:37.884 [INF] Login attempt...
+2025-06-05 16:35:37.884 [DBG] Validating credentials...
+2025-06-05 16:35:37.884 [WRN] Login failed: Invalid credentials
+2025-06-05 16:35:42.746 [INF] Login attempt...
+2025-06-05 16:35:42.746 [DBG] Validating credentials...
+2025-06-05 16:35:42.746 [INF] Login successful, opening MainWindow
+2025-06-05 16:35:42.746 [INF] Initializing MainWindow...
+2025-06-05 16:35:42.751 [ERR] Error initializing MainWindow
+System.Windows.Markup.XamlParseException: 'Provide value on 'System.Windows.StaticResourceExtension' threw an exception.' Line number '36' and line position '25'.
+ ---> System.Exception: Cannot find resource named 'MaterialDesignFlatButton'. Resource names are case sensitive.
+   at System.Windows.StaticResourceExtension.ProvideValueInternal(IServiceProvider serviceProvider, Boolean allowDeferredReference)
+   at MS.Internal.Xaml.Runtime.ClrObjectRuntime.CallProvideValue(MarkupExtension me, IServiceProvider serviceProvider)
+   --- End of inner exception stack trace ---
+   at System.Windows.Markup.XamlReader.RewrapException(Exception e, IXamlLineInfo lineInfo, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.LoadBaml(XamlReader xamlReader, Boolean skipJournaledProperties, Object rootObject, XamlAccessLevel accessLevel, Uri baseUri)
+   at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
+   at System.Windows.Application.LoadComponent(Object component, Uri resourceLocator)
+   at UsbDlpAgent.UI.MainWindow.InitializeComponent() in C:\UsbDlpAgent\UsbDlpAgent.UI\MainWindow.xaml:line 1
+   at UsbDlpAgent.UI.MainWindow..ctor() in C:\UsbDlpAgent\UsbDlpAgent.UI\MainWindow.xaml.cs:line 28
+2025-06-05 16:36:31.184 [ERR] Error during login process
+System.Windows.Markup.XamlParseException: 'Provide value on 'System.Windows.StaticResourceExtension' threw an exception.' Line number '36' and line position '25'.
+ ---> System.Exception: Cannot find resource named 'MaterialDesignFlatButton'. Resource names are case sensitive.
+   at System.Windows.StaticResourceExtension.ProvideValueInternal(IServiceProvider serviceProvider, Boolean allowDeferredReference)
+   at MS.Internal.Xaml.Runtime.ClrObjectRuntime.CallProvideValue(MarkupExtension me, IServiceProvider serviceProvider)
+   --- End of inner exception stack trace ---
+   at System.Windows.Markup.XamlReader.RewrapException(Exception e, IXamlLineInfo lineInfo, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.LoadBaml(XamlReader xamlReader, Boolean skipJournaledProperties, Object rootObject, XamlAccessLevel accessLevel, Uri baseUri)
+   at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
+   at System.Windows.Application.LoadComponent(Object component, Uri resourceLocator)
+   at UsbDlpAgent.UI.MainWindow.InitializeComponent() in C:\UsbDlpAgent\UsbDlpAgent.UI\MainWindow.xaml:line 1
+   at UsbDlpAgent.UI.MainWindow..ctor() in C:\UsbDlpAgent\UsbDlpAgent.UI\MainWindow.xaml.cs:line 28
+   at UsbDlpAgent.UI.LoginWindow.LoginButton_Click(Object sender, RoutedEventArgs e) in C:\UsbDlpAgent\UsbDlpAgent.UI\LoginWindow.xaml.cs:line 43

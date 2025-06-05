@@ -1,139 +1,238 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using System;
-using System.Collections.Generic; // Cho List
-using System.Collections.ObjectModel;
-using System.Linq; // Cho OrderByDescending
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading; // Cho Dispatcher
-using UsbDlpAgent.SharedModels; // Sử dụng model chung
+using UsbDlpAgent.SharedModels;
+using Serilog;
 
 namespace UsbDlpAgent.UI
 {
     public partial class MainWindow : Window
     {
         private HubConnection? _hubConnection;
-        public ObservableCollection<FileActivity> EventLog { get; set; }
+        private const string HubUrl = "http://localhost:5121/dlphub"; // Phải khớp với service
+        private bool _historyViewHubInitialized = false;
 
-        private const string HubUrl = "http://localhost:5124/dlphub"; // Phải khớp với service
+        // Dummy handlers for unsubscribing to avoid CS1998 warnings
+        private Task HubConnection_Closed_DummyHandler(Exception? arg) { return Task.CompletedTask; }
+        private Task HubConnection_Reconnecting_DummyHandler(Exception? arg) { return Task.CompletedTask; }
+        private Task HubConnection_Reconnected_DummyHandler(string? arg) { return Task.CompletedTask; }
 
         public MainWindow()
         {
-            InitializeComponent();
-            EventLog = new ObservableCollection<FileActivity>();
-            EventListView.ItemsSource = EventLog;
-            ConnectionStatusText.Text = "Status: Disconnected";
+            try
+            {
+                Log.Information("Initializing MainWindow...");
+                InitializeComponent();
+                ConnectionStatusText.Text = "Trạng thái: Đã ngắt kết nối";
+                Log.Debug("MainWindow initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error initializing MainWindow");
+                MessageBox.Show($"Error initializing main window: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                throw;
+            }
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            _hubConnection = new HubConnectionBuilder()
-                .WithUrl(HubUrl)
-                .WithAutomaticReconnect(new[] { TimeSpan.Zero, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30) })
-                .Build();
-
-            _hubConnection.Closed += async (error) =>
+            try
             {
-                await Dispatcher.InvokeAsync(() => ConnectionStatusText.Text = $"Status: Disconnected. {error?.Message}");
-            };
+                Log.Information("MainWindow loaded, initializing SignalR connection...");
+                _hubConnection = new HubConnectionBuilder()
+                    .WithUrl(HubUrl)
+                    .WithAutomaticReconnect(new[] {
+                        TimeSpan.Zero, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30)
+                    })
+                    .Build();
 
-            _hubConnection.Reconnecting += error =>
-            {
-                Dispatcher.Invoke(() => ConnectionStatusText.Text = $"Status: Reconnecting... ({error?.Message})");
-                return Task.CompletedTask;
-            };
+                Log.Debug("Setting up SignalR event handlers...");
+                _hubConnection.Closed += HubConnection_Closed_Handler;
+                _hubConnection.Reconnecting += HubConnection_Reconnecting_Handler;
+                _hubConnection.Reconnected += HubConnection_Reconnected_Handler;
 
-            _hubConnection.Reconnected += connectionId =>
-            {
-                Dispatcher.Invoke(() => ConnectionStatusText.Text = $"Status: Reconnected (ID: {connectionId})");
-                // Yêu cầu lại lịch sử sau khi kết nối lại
-                _hubConnection?.InvokeAsync("RequestHistory", 50); // Lấy 50 mục
-                return Task.CompletedTask;
-            };
-
-            _hubConnection.On<FileActivity>("ReceiveNewEvent", (activity) =>
-            {
-                Dispatcher.Invoke(() =>
+                _hubConnection.On<FileActivity>("ReceiveNewEvent", (activity) =>
                 {
-                    EventLog.Insert(0, activity); // Thêm vào đầu
-                    if (EventLog.Count > 200) // Giới hạn số lượng trên UI
+                    try
                     {
-                        EventLog.RemoveAt(EventLog.Count - 1);
+                        Log.Debug("Received new event: {Event}", activity);
+                        RealtimeViewInstance?.AddEvent(activity);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Error handling new event");
                     }
                 });
-            });
 
-            _hubConnection.On<List<FileActivity>>("ReceiveHistory", (history) =>
-            {
-                Dispatcher.Invoke(() =>
+                _hubConnection.On<List<FileActivity>>("ReceiveInitialRealtimeHistory", (history) =>
                 {
-                    EventLog.Clear();
-                    // Lịch sử từ Hub có thể đã được sắp xếp, hoặc sắp xếp lại ở đây
-                    foreach (var activity in history.OrderByDescending(a => a.Timestamp))
+                    try
                     {
-                        EventLog.Add(activity);
+                        Log.Debug("Received initial history with {Count} events", history?.Count ?? 0);
+                        RealtimeViewInstance?.LoadInitialHistory(history);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Error handling initial history");
                     }
                 });
-            });
 
-            await ConnectWithRetryAsync();
+                _hubConnection.On<List<FileActivity>>("ReceiveFilteredHistoryData", (history) =>
+                {
+                    try
+                    {
+                        Log.Debug("Received filtered history with {Count} events", history?.Count ?? 0);
+                        HistoryViewInstance?.LoadFilteredHistory(history);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Error handling filtered history");
+                    }
+                });
+
+                await ConnectWithRetryAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in Window_Loaded");
+                MessageBox.Show($"Error initializing connection: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private Task HubConnection_Closed_Handler(Exception? error)
+        {
+            return Dispatcher.InvokeAsync(() =>
+            {
+                Log.Warning(error, "SignalR connection closed");
+                ConnectionStatusText.Text = $"Trạng thái: Đã ngắt kết nối. {(error == null ? "" : error.Message)}";
+                _historyViewHubInitialized = false;
+            }).Task;
+        }
+
+        private Task HubConnection_Reconnecting_Handler(Exception? error)
+        {
+            Log.Information(error, "SignalR connection reconnecting");
+            Dispatcher.Invoke(() => ConnectionStatusText.Text = $"Trạng thái: Đang kết nối lại... ({(error == null ? "" : error.Message)})");
+            return Task.CompletedTask;
+        }
+
+        private async Task HubConnection_Reconnected_Handler(string? connectionId)
+        {
+            try
+            {
+                Log.Information("SignalR connection reconnected with ID: {ConnectionId}", connectionId);
+                Dispatcher.Invoke(() => ConnectionStatusText.Text = $"Trạng thái: Đã kết nối lại (ID: {connectionId})");
+
+                if (!_historyViewHubInitialized && HistoryViewInstance != null && _hubConnection != null)
+                {
+                    Log.Debug("Initializing history view hub connection");
+                    HistoryViewInstance.SetHubConnection(_hubConnection);
+                    _historyViewHubInitialized = true;
+                }
+
+                if (_hubConnection != null)
+                {
+                    Log.Debug("Requesting initial events after reconnect");
+                    await _hubConnection.InvokeAsync("RequestInitialRealtimeEvents", 50);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in reconnected handler");
+                MessageBox.Show($"Error after reconnection: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private async Task ConnectWithRetryAsync()
         {
             if (_hubConnection == null) return;
 
-            Dispatcher.Invoke(() => ConnectionStatusText.Text = $"Status: Connecting to {HubUrl}...");
-            while (_hubConnection.State != HubConnectionState.Connected)
+            Log.Information("Attempting to connect to SignalR hub at {HubUrl}", HubUrl);
+            Dispatcher.Invoke(() => ConnectionStatusText.Text = $"Trạng thái: Đang kết nối đến {HubUrl}...");
+            
+            int retryCount = 0;
+            while (true)
             {
+                if (_hubConnection.State == HubConnectionState.Connected) break;
                 try
                 {
+                    Log.Debug("Starting SignalR connection attempt {RetryCount}", retryCount + 1);
                     await _hubConnection.StartAsync();
-                    Dispatcher.Invoke(() => ConnectionStatusText.Text = $"Status: Connected to {HubUrl}");
-                    // Không cần gọi RequestHistory ở đây nữa vì OnConnectedAsync của Hub sẽ làm
+                    Log.Information("Successfully connected to SignalR hub");
+                    Dispatcher.Invoke(() => ConnectionStatusText.Text = $"Trạng thái: Đã kết nối đến {HubUrl}");
+
+                    if (!_historyViewHubInitialized && HistoryViewInstance != null)
+                    {
+                        Log.Debug("Initializing history view hub connection");
+                        HistoryViewInstance.SetHubConnection(_hubConnection);
+                        _historyViewHubInitialized = true;
+                    }
+
+                    Log.Debug("Requesting initial events");
+                    await _hubConnection.InvokeAsync("RequestInitialRealtimeEvents", 50);
                     return;
                 }
                 catch (Exception ex)
                 {
-                    Dispatcher.Invoke(() => ConnectionStatusText.Text = "Status: Connection failed. Retrying in 5s...");
-                    Console.WriteLine($"SignalR Connection failed: {ex.Message}");
+                    retryCount++;
+                    Log.Warning(ex, "SignalR connection attempt {RetryCount} failed", retryCount);
+                    Dispatcher.Invoke(() => ConnectionStatusText.Text = "Trạng thái: Kết nối thất bại. Thử lại sau 5 giây...");
                     await Task.Delay(5000);
                 }
             }
         }
 
-        private async void RequestHistoryButton_Click(object sender, RoutedEventArgs e)
+        private async void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_hubConnection?.State == HubConnectionState.Connected)
+            try
             {
-                try
+                Log.Information("User logging out");
+                if (_hubConnection != null)
                 {
-                    // Yêu cầu 100 mục lịch sử khi nhấn nút
-                    await _hubConnection.InvokeAsync("RequestHistory", 100);
-                    MessageBox.Show("Requested history. Check the list.", "History Request", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Log.Debug("Stopping SignalR connection");
+                    await _hubConnection.StopAsync();
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error requesting history: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                Log.Debug("Opening login window");
+                LoginWindow loginWindow = new LoginWindow();
+                loginWindow.Show();
+                this.Close();
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Not connected to the service.", "Connection Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Log.Error(ex, "Error during logout");
+                MessageBox.Show($"Error during logout: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private async void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (_hubConnection != null)
+            try
             {
-                // Hủy đăng ký sự kiện để tránh lỗi nếu DisposeAsync mất thời gian
-                _hubConnection.Closed -= async (error) => { /* ... */ };
-                _hubConnection.Reconnecting -= error => { /* ... */ return Task.CompletedTask; };
-                _hubConnection.Reconnected -= connectionId => { /* ... */ return Task.CompletedTask; };
+                Log.Information("MainWindow closing, cleaning up SignalR connection");
+                if (_hubConnection != null)
+                {
+                    Log.Debug("Removing SignalR event handlers");
+                    _hubConnection.Closed -= HubConnection_Closed_Handler;
+                    _hubConnection.Reconnecting -= HubConnection_Reconnecting_Handler;
+                    _hubConnection.Reconnected -= HubConnection_Reconnected_Handler;
 
-                await _hubConnection.DisposeAsync();
-                _hubConnection = null;
+                    Log.Debug("Removing SignalR message handlers");
+                    _hubConnection.Remove("ReceiveNewEvent");
+                    _hubConnection.Remove("ReceiveInitialRealtimeHistory");
+                    _hubConnection.Remove("ReceiveFilteredHistoryData");
+
+                    Log.Debug("Disposing SignalR connection");
+                    await _hubConnection.DisposeAsync();
+                    _hubConnection = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error during window closing");
+                MessageBox.Show($"Error during cleanup: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

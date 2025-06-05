@@ -27,3 +27,4 @@ C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\refint\UsbDlpAgent.dll
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.pdb
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.genruntimeconfig.cache
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\ref\UsbDlpAgent.dll
+C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.sourcelink.json

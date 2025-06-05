@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging; // For logging configuration
 using Microsoft.AspNetCore.Builder;   // For app.UseRouting, app.UseEndpoints
 using Microsoft.AspNetCore.Hosting;   // For ConfigureWebHostDefaults, UseUrls
-using UsbDlpAgent.Hubs;       // For DlpNotificationHub
+using UsbDlpAgent.Hubs;
 
 public class Program
 {
@@ -23,7 +23,7 @@ public class Program
             {
                 logging.ClearProviders();
                 logging.AddConsole();
-                if (OperatingSystem.IsWindows()) // Đảm bảo chỉ thêm EventLog trên Windows
+                if (OperatingSystem.IsWindows())
                 {
                     logging.AddEventLog(eventLogSettings =>
                     {
@@ -47,14 +47,11 @@ public class Program
             })
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                // Có thể đọc URL từ cấu hình hoặc đặt cứng ở đây
-                // Ví dụ: webBuilder.UseUrls("http://localhost:5123");
-                // Nếu bạn có appsettings.json với mục Kestrel, nó sẽ được ưu tiên.
-                // Hoặc bạn có thể cấu hình Kestrel trực tiếp:
+
                 webBuilder.ConfigureKestrel(serverOptions =>
                 {
-                    serverOptions.ListenLocalhost(5123); // Lắng nghe trên http://localhost:5123
-                    // serverOptions.ListenLocalhost(5124, listenOptions => listenOptions.UseHttps()); // Nếu muốn HTTPS
+                    // serverOptions.ListenLocalhost(5125); // Lắng nghe trên http://localhost:5123
+                    serverOptions.ListenLocalhost(5120, listenOptions => listenOptions.UseHttps()); // Nếu muốn HTTPS
                 });
 
                 webBuilder.Configure(app =>
