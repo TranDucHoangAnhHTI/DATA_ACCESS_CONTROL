@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Data;
 using System.Windows;
 using System.Windows.Threading;
@@ -36,7 +37,7 @@ public partial class App : Application
         e.Handled = true;
     }
 
-    private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    private void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
     {
         if (e.ExceptionObject is Exception ex)
         {

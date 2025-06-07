@@ -1,0 +1,12 @@
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\bin\Release\net8.0\UsbDlpAgent.SharedModels.deps.json
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\bin\Release\net8.0\UsbDlpAgent.SharedModels.dll
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\bin\Release\net8.0\UsbDlpAgent.SharedModels.pdb
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\obj\Release\net8.0\UsbDlpAgent.SharedModels.GeneratedMSBuildEditorConfig.editorconfig
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\obj\Release\net8.0\UsbDlpAgent.SharedModels.AssemblyInfoInputs.cache
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\obj\Release\net8.0\UsbDlpAgent.SharedModels.AssemblyInfo.cs
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\obj\Release\net8.0\UsbDlpAgent.SharedModels.csproj.CoreCompileInputs.cache
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\obj\Release\net8.0\UsbDlpAgent.SharedModels.sourcelink.json
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\obj\Release\net8.0\UsbDlpAgent.SharedModels.dll
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\obj\Release\net8.0\refint\UsbDlpAgent.SharedModels.dll
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\obj\Release\net8.0\UsbDlpAgent.SharedModels.pdb
+C:\UsbDlpAgent\UsbDlpAgent.SharedModels\obj\Release\net8.0\ref\UsbDlpAgent.SharedModels.dll

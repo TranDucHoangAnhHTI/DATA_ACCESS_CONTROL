@@ -10,35 +10,43 @@ using UsbDlpAgent.SharedModels; // Sử dụng model chung
 using System.ComponentModel;
 using System.Windows.Data;
 using System.Windows.Controls; // Cho TextChangedEventArgs và SelectionChangedEventArgs
+using System.Globalization;
+using System.Windows.Media.Animation;
+using System.Windows.Media;
+using System.Windows.Forms; // For NotifyIcon
+using System.Drawing; // For SystemIcons
+using System.Windows.Interop; // For window handle
+using WinForms = System.Windows.Forms;
+using WinFormsRectangle = System.Drawing.Rectangle;
 
 namespace UsbDlpAgent.UI
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private HubConnection? _hubConnection;
-        private ObservableCollection<FileActivity> _eventLog;
+        private readonly ObservableCollection<FileActivity> _eventLog;
         private ICollectionView? _eventLogView;
         private bool _isConnected;
         private bool _isReconnecting;
         private bool _isInitialized;
+        private readonly CultureInfo _viCulture = new CultureInfo("vi-VN");
+        private readonly TimeZoneInfo _vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        private const string HubUrl = "http://localhost:5121/dlphub"; // Cập nhật URL hub
+        private bool _showNotifications = true;
+        private bool _autoScroll = true;
 
-        public ObservableCollection<FileActivity> EventLog
-        {
-            get => _eventLog;
-            private set
-            {
-                _eventLog = value;
-                OnPropertyChanged(nameof(EventLog));
-            }
-        }
+        public ObservableCollection<FileActivity> EventLog { get; }
 
         public bool IsConnected
         {
             get => _isConnected;
             set
             {
-                _isConnected = value;
-                OnPropertyChanged(nameof(IsConnected));
+                if (_isConnected != value)
+                {
+                    _isConnected = value;
+                    OnPropertyChanged(nameof(IsConnected));
+                }
             }
         }
 
@@ -47,143 +55,180 @@ namespace UsbDlpAgent.UI
             get => _isReconnecting;
             set
             {
-                _isReconnecting = value;
-                OnPropertyChanged(nameof(IsReconnecting));
+                if (_isReconnecting != value)
+                {
+                    _isReconnecting = value;
+                    OnPropertyChanged(nameof(IsReconnecting));
+                }
             }
         }
 
-        private const string HubUrl = "http://localhost:5124/dlphub"; // Phải khớp với service
+        public bool ShowNotifications
+        {
+            get => _showNotifications;
+            set
+            {
+                if (_showNotifications != value)
+                {
+                    _showNotifications = value;
+                    OnPropertyChanged(nameof(ShowNotifications));
+                }
+            }
+        }
+
+        public bool AutoScroll
+        {
+            get => _autoScroll;
+            set
+            {
+                if (_autoScroll != value)
+                {
+                    _autoScroll = value;
+                    OnPropertyChanged(nameof(AutoScroll));
+                }
+            }
+        }
 
         public MainWindow()
         {
             InitializeComponent();
             _eventLog = new ObservableCollection<FileActivity>();
-            EventListView.ItemsSource = _eventLog;
-            _eventLogView = CollectionViewSource.GetDefaultView(_eventLog);
-            ConnectionStatusText.Text = "Status: Disconnected";
+            EventLog = _eventLog;
             DataContext = this;
 
-            // Initialize ComboBox items
-            TypeFilterCombo.Items.Clear();
-            TypeFilterCombo.Items.Add(new ComboBoxItem { Content = "All Types" });
-            TypeFilterCombo.Items.Add(new ComboBoxItem { Content = "Created" });
-            TypeFilterCombo.Items.Add(new ComboBoxItem { Content = "Modified" });
-            TypeFilterCombo.Items.Add(new ComboBoxItem { Content = "Deleted" });
-            TypeFilterCombo.Items.Add(new ComboBoxItem { Content = "Renamed" });
-            TypeFilterCombo.SelectedIndex = 0;
+            // Khởi tạo các thành phần UI
+            InitializeFilters();
+            InitializeEventLogView();
 
             _isInitialized = true;
         }
 
+        private void InitializeEventLogView()
+        {
+            _eventLogView = CollectionViewSource.GetDefaultView(_eventLog);
+            EventListView.ItemsSource = _eventLogView;
+        }
+
+        private void InitializeFilters()
+        {
+            // Đảm bảo ComboBox trống trước khi thiết lập ItemsSource
+            TypeFilterCombo.Items.Clear();
+
+            var filterItems = new[]
+            {
+                new FilterItem { Value = (ActivityType?)null, Display = "Tất cả loại" },
+                new FilterItem { Value = ActivityType.Created, Display = "Tạo mới" },
+                new FilterItem { Value = ActivityType.Modified, Display = "Sửa đổi" },
+                new FilterItem { Value = ActivityType.Deleted, Display = "Xóa" },
+                new FilterItem { Value = ActivityType.Renamed, Display = "Đổi tên" },
+                new FilterItem { Value = ActivityType.MovedToUsb, Display = "Di chuyển vào USB" }
+            };
+
+            TypeFilterCombo.ItemsSource = filterItems;
+            TypeFilterCombo.DisplayMemberPath = "Display";
+            TypeFilterCombo.SelectedValuePath = "Value";
+            TypeFilterCombo.SelectedIndex = 0;
+        }
+
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            _hubConnection = new HubConnectionBuilder()
-                .WithUrl(HubUrl)
-                .WithAutomaticReconnect(new[] { TimeSpan.Zero, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30) })
-                .Build();
+            await ConnectToServer();
+        }
 
-            _hubConnection.Closed += async (error) =>
-            {
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    IsConnected = false;
-                    IsReconnecting = false;
-                    ConnectionStatusText.Text = $"Status: Disconnected. {error?.Message}";
-                });
-            };
-
-            _hubConnection.Reconnecting += error =>
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    IsConnected = false;
-                    IsReconnecting = true;
-                    ConnectionStatusText.Text = $"Status: Reconnecting... ({error?.Message})";
-                });
-                return Task.CompletedTask;
-            };
-
-            _hubConnection.Reconnected += async (error) =>
-            {
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    IsConnected = true;
-                    IsReconnecting = false;
-                    ConnectionStatusText.Text = "Status: Connected";
-                });
-            };
-
-            _hubConnection.On<FileActivity>("ReceiveNewEvent", (activity) =>
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    EventLog.Insert(0, activity); // Thêm vào đầu
-                    if (EventLog.Count > 200) // Giới hạn số lượng trên UI
-                    {
-                        EventLog.RemoveAt(EventLog.Count - 1);
-                    }
-                    UpdateEventCount();
-                });
-            });
-
-            _hubConnection.On<List<FileActivity>>("ReceiveHistory", (history) =>
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    EventLog.Clear();
-                    // Lịch sử từ Hub có thể đã được sắp xếp, hoặc sắp xếp lại ở đây
-                    foreach (var activity in history.OrderByDescending(a => a.Timestamp))
-                    {
-                        EventLog.Add(activity);
-                    }
-                });
-            });
-
+        private async Task ConnectToServer()
+        {
             try
             {
-                await _hubConnection.StartAsync();
-                IsConnected = true;
-                ConnectionStatusText.Text = "Status: Connected";
+                if (_hubConnection == null)
+                {
+                    _hubConnection = new HubConnectionBuilder()
+                        .WithUrl(HubUrl)
+                        .WithAutomaticReconnect()
+                        .Build();
+
+                    if (_hubConnection != null)
+                    {
+                        // Xử lý sự kiện nhận lịch sử
+                        _hubConnection.On<List<FileActivity>>("ReceiveHistory", history =>
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                EventLog.Clear();
+                                foreach (var activity in history.OrderByDescending(a => a.Timestamp))
+                                {
+                                    EventLog.Add(activity);
+                                }
+                                UpdateEventCount();
+                            });
+                        });
+
+                        // Xử lý sự kiện nhận hoạt động mới
+                        _hubConnection.On<FileActivity>("ReceiveFileActivity", activity =>
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                EventLog.Insert(0, activity);
+                                if (EventLog.Count > 200)
+                                {
+                                    EventLog.RemoveAt(EventLog.Count - 1);
+                                }
+                                UpdateEventCount();
+
+                                // Hiển thị thông báo và cuộn lên đầu
+                                var activityType = activity.Type switch
+                                {
+                                    ActivityType.Created => "Tạo mới",
+                                    ActivityType.Modified => "Sửa đổi",
+                                    ActivityType.Deleted => "Xóa",
+                                    ActivityType.Renamed => "Đổi tên",
+                                    ActivityType.MovedToUsb => "Di chuyển vào USB",
+                                    _ => "Không xác định"
+                                };
+
+                                ShowNotification(
+                                    "Sự kiện mới",
+                                    $"{activityType}: {activity.FilePath}\nỔ đĩa: {activity.Drive}"
+                                );
+                                ScrollToTop();
+                            });
+                        });
+
+                        // Đăng ký các sự kiện kết nối
+                        _hubConnection.Closed += HubConnection_Closed;
+                        _hubConnection.Reconnecting += HubConnection_Reconnecting;
+                        _hubConnection.Reconnected += HubConnection_Reconnected;
+
+                        await _hubConnection.StartAsync();
+                        UpdateConnectionStatus(true);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error connecting to server: {ex.Message}", "Connection Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                ConnectionStatusText.Text = "Status: Connection Failed";
+                System.Windows.MessageBox.Show($"Lỗi kết nối đến máy chủ: {ex.Message}", "Lỗi kết nối", MessageBoxButton.OK, MessageBoxImage.Error);
+                UpdateConnectionStatus(false);
             }
         }
 
-        private async void RequestHistoryButton_Click(object sender, RoutedEventArgs e)
+        private async Task RequestHistory(int count = 50)
         {
-            if (_hubConnection?.State == HubConnectionState.Connected)
+            try
             {
-                try
+                if (_hubConnection?.State == HubConnectionState.Connected)
                 {
-                    // Yêu cầu 100 mục lịch sử khi nhấn nút
-                    await _hubConnection.InvokeAsync("RequestHistory", 100);
-                    MessageBox.Show("Requested history. Check the list.", "History Request", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await _hubConnection.InvokeAsync("RequestHistory", count);
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show($"Error requesting history: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối.",
+                                  "Lỗi kết nối",
+                                  MessageBoxButton.OK,
+                                  MessageBoxImage.Warning);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Not connected to the service.", "Connection Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-        private async void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (_hubConnection != null)
-            {
-                // Hủy đăng ký sự kiện để tránh lỗi nếu DisposeAsync mất thời gian
-                _hubConnection.Closed -= async (error) => { /* ... */ };
-                _hubConnection.Reconnecting -= error => { /* ... */ return Task.CompletedTask; };
-                _hubConnection.Reconnected -= connectionId => { /* ... */ return Task.CompletedTask; };
-
-                await _hubConnection.DisposeAsync();
-                _hubConnection = null;
+                System.Windows.MessageBox.Show($"Lỗi khi yêu cầu lịch sử: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -221,28 +266,29 @@ namespace UsbDlpAgent.UI
 
             try
             {
-                _eventLogView.Filter = item =>
+                _eventLogView.Filter = obj =>
                 {
-                    if (item is not FileActivity activity) return false;
+                    if (obj is not FileActivity activity) return false;
+
+                    // Lọc theo loại hoạt động
+                    if (TypeFilterCombo.SelectedValue is ActivityType selectedType)
+                    {
+                        if (activity.Type != selectedType) return false;
+                    }
 
                     var searchText = SearchBox.Text.ToLower();
-                    var typeFilter = (TypeFilterCombo.SelectedItem as ComboBoxItem)?.Content.ToString();
-
                     var matchesSearch = string.IsNullOrEmpty(searchText) ||
                                       activity.FilePath?.ToLower().Contains(searchText) == true ||
                                       activity.OldFilePath?.ToLower().Contains(searchText) == true;
 
-                    var matchesType = typeFilter == "All Types" || 
-                                    (typeFilter != null && activity.Type.ToString() == typeFilter);
-
-                    return matchesSearch && matchesType;
+                    return matchesSearch;
                 };
 
                 UpdateEventCount();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error applying filters: {ex.Message}", "Filter Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show($"Lỗi khi áp dụng bộ lọc: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -256,19 +302,67 @@ namespace UsbDlpAgent.UI
             try
             {
                 var count = _eventLogView.Cast<object>().Count();
-                EventCountText.Text = $"{count} event{(count != 1 ? "s" : "")}";
+                EventCountText.Text = $"{count} sự kiện";
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error updating event count: {ex.Message}", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show($"Lỗi khi cập nhật số lượng sự kiện: {ex.Message}", "Lỗi cập nhật", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void Refresh_Click(object sender, RoutedEventArgs e)
+        private async void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_isInitialized)
+            try
             {
-                ApplyFilters();
+                // Vô hiệu hóa nút trong khi đang cập nhật
+                RefreshButton.IsEnabled = false;
+
+                // Bắt đầu animation xoay
+                var animation = new DoubleAnimation
+                {
+                    From = 0,
+                    To = 360,
+                    Duration = TimeSpan.FromSeconds(1),
+                    RepeatBehavior = RepeatBehavior.Forever
+                };
+                RefreshIconRotation.BeginAnimation(RotateTransform.AngleProperty, animation);
+
+                // Xóa dữ liệu cũ và yêu cầu dữ liệu mới từ server
+                await Dispatcher.InvokeAsync(async () =>
+                {
+                    EventLog.Clear();
+                    UpdateEventCount();
+                    // Reset các bộ lọc
+                    TypeFilterCombo.SelectedIndex = 0;
+                    SearchBox.Clear();
+                    
+                    // Yêu cầu dữ liệu mới từ server
+                    await RequestHistory();
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Lỗi khi cập nhật dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // Dừng animation và kích hoạt lại nút
+                RefreshIconRotation.BeginAnimation(RotateTransform.AngleProperty, null);
+                RefreshButton.IsEnabled = true;
+            }
+        }
+
+        private string FormatDateTime(DateTime utcTime)
+        {
+            try
+            {
+                var localTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, _vietnamTimeZone);
+                return localTime.ToString("dd/MM/yyyy HH:mm:ss.fff", _viCulture);
+            }
+            catch
+            {
+                // Fallback to UTC if conversion fails
+                return utcTime.ToString("dd/MM/yyyy HH:mm:ss.fff", _viCulture) + " UTC";
             }
         }
 
@@ -276,13 +370,144 @@ namespace UsbDlpAgent.UI
         {
             if (EventListView.SelectedItem is FileActivity activity)
             {
-                var details = $"Timestamp: {activity.Timestamp:yyyy-MM-dd HH:mm:ss.fff}\n" +
-                            $"Type: {activity.Type}\n" +
-                            $"File Path: {activity.FilePath}\n" +
-                            (activity.OldFilePath != null ? $"Old File Path: {activity.OldFilePath}\n" : "") +
-                            $"Drive: {activity.Drive}";
+                var details = $"Thời gian: {FormatDateTime(activity.Timestamp)}\n" +
+                            $"Loại: {GetVietnameseEventType(activity.Type)}\n" +
+                            $"Đường dẫn: {activity.FilePath}\n" +
+                            (activity.OldFilePath != null ? $"Đường dẫn cũ: {activity.OldFilePath}\n" : "") +
+                            $"Ổ đĩa: {activity.Drive}";
 
-                MessageBox.Show(details, "Event Details", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show(details, "Chi tiết sự kiện", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private string GetVietnameseEventType(ActivityType type)
+        {
+            return type switch
+            {
+                ActivityType.Created => "Tạo mới",
+                ActivityType.Modified => "Sửa đổi",
+                ActivityType.Deleted => "Xóa",
+                ActivityType.Renamed => "Đổi tên",
+                ActivityType.MovedToUsb => "Di chuyển vào USB",
+                _ => type.ToString()
+            };
+        }
+
+        private void UpdateConnectionStatus(bool isConnected)
+        {
+            IsConnected = isConnected;
+            ConnectionStatusText.Text = isConnected ? "Trạng thái: Đã kết nối" : "Trạng thái: Kết nối thất bại";
+        }
+
+        private async void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (_hubConnection != null)
+            {
+                try
+                {
+                    // Hủy đăng ký các sự kiện
+                    _hubConnection.Closed -= HubConnection_Closed;
+                    _hubConnection.Reconnecting -= HubConnection_Reconnecting;
+                    _hubConnection.Reconnected -= HubConnection_Reconnected;
+
+                    // Đóng kết nối
+                    await _hubConnection.StopAsync();
+                    await _hubConnection.DisposeAsync();
+                    _hubConnection = null;
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Lỗi khi đóng kết nối: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private async Task HubConnection_Closed(Exception? error)
+        {
+            await Dispatcher.InvokeAsync(() =>
+            {
+                IsConnected = false;
+                IsReconnecting = false;
+                ConnectionStatusText.Text = $"Trạng thái: Ngắt kết nối. {error?.Message}";
+            });
+        }
+
+        private Task HubConnection_Reconnecting(Exception? error)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                IsConnected = false;
+                IsReconnecting = true;
+                ConnectionStatusText.Text = $"Trạng thái: Đang kết nối lại... ({error?.Message})";
+            });
+            return Task.CompletedTask;
+        }
+
+        private async Task HubConnection_Reconnected(string? connectionId)
+        {
+            await Dispatcher.InvokeAsync(() =>
+            {
+                IsConnected = true;
+                IsReconnecting = false;
+                ConnectionStatusText.Text = "Trạng thái: Đã kết nối";
+                // Yêu cầu lịch sử sự kiện khi kết nối lại
+                _ = RequestHistory();
+            });
+        }
+
+        private void ShowNotification(string title, string message)
+        {
+            if (!ShowNotifications) return;
+
+            // Tạo một cửa sổ thông báo đơn giản
+            var notification = new Window
+            {
+                Title = title,
+                Content = new TextBlock
+                {
+                    Text = message,
+                    Margin = new Thickness(10),
+                    TextWrapping = TextWrapping.Wrap
+                },
+                SizeToContent = SizeToContent.WidthAndHeight,
+                WindowStyle = WindowStyle.ToolWindow,
+                ShowInTaskbar = false,
+                Topmost = true,
+                ResizeMode = ResizeMode.NoResize,
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(240, 240, 240)),
+                BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(200, 200, 200)),
+                BorderThickness = new Thickness(1)
+            };
+
+            // Đặt vị trí thông báo ở góc phải dưới màn hình
+            var screen = WinForms.Screen.PrimaryScreen?.WorkingArea;
+            if (screen != null)
+            {
+                var workingArea = (WinFormsRectangle)screen;
+                notification.Left = workingArea.Right - notification.Width - 10;
+                notification.Top = workingArea.Bottom - notification.Height - 10;
+            }
+
+            // Hiển thị thông báo
+            notification.Show();
+
+            // Tự động đóng sau 3 giây
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                notification.Close();
+            };
+            timer.Start();
+        }
+
+        private void ScrollToTop()
+        {
+            if (!AutoScroll) return;
+            
+            if (EventListView.Items.Count > 0)
+            {
+                EventListView.ScrollIntoView(EventListView.Items[0]);
             }
         }
 
@@ -290,6 +515,13 @@ namespace UsbDlpAgent.UI
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        // Thêm class FilterItem để định nghĩa kiểu dữ liệu cho các item trong ComboBox
+        private class FilterItem
+        {
+            public ActivityType? Value { get; set; }
+            public string Display { get; set; } = string.Empty;
         }
     }
 }

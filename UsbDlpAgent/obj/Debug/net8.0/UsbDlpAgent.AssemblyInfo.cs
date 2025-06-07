@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UsbDlpAgent")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+99d291e915fcc5685c5ca1c04acb8a66950b2c0d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+24afc2819b058c1b456cc6ee6a89e74ea5710617")]
 [assembly: System.Reflection.AssemblyProductAttribute("UsbDlpAgent")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UsbDlpAgent")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

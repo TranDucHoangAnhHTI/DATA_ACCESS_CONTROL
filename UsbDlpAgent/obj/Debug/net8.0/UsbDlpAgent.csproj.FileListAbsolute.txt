@@ -21,10 +21,10 @@ C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.GeneratedMSBuildEditorCo
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.AssemblyInfoInputs.cache
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.AssemblyInfo.cs
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.csproj.CoreCompileInputs.cache
+C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.sourcelink.json
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAg.ED6ACB7A.Up2Date
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.dll
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\refint\UsbDlpAgent.dll
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.pdb
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.genruntimeconfig.cache
 C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\ref\UsbDlpAgent.dll
-C:\UsbDlpAgent\UsbDlpAgent\obj\Debug\net8.0\UsbDlpAgent.sourcelink.json

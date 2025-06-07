@@ -1,0 +1,6 @@
+C:\UsbDlpAgent\UsbDlpAgent.UI\obj\Release\net8.0-windows\win-x64\UsbDlpAgent.UI.csproj.AssemblyReference.cache
+C:\UsbDlpAgent\UsbDlpAgent.UI\obj\Release\net8.0-windows\win-x64\MainWindow.g.cs
+C:\UsbDlpAgent\UsbDlpAgent.UI\obj\Release\net8.0-windows\win-x64\App.g.cs
+C:\UsbDlpAgent\UsbDlpAgent.UI\obj\Release\net8.0-windows\win-x64\GeneratedInternalTypeHelper.g.cs
+C:\UsbDlpAgent\UsbDlpAgent.UI\obj\Release\net8.0-windows\win-x64\UsbDlpAgent.UI_MarkupCompile.cache
+C:\UsbDlpAgent\UsbDlpAgent.UI\obj\Release\net8.0-windows\win-x64\UsbDlpAgent.UI_MarkupCompile.lref
