@@ -309,22 +309,6 @@
           }
         }
       },
-      "Serilog.Sinks.Debug/2.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Serilog": "2.10.0"
-        },
-        "compile": {
-          "lib/netstandard2.1/Serilog.Sinks.Debug.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netstandard2.1/Serilog.Sinks.Debug.dll": {
-            "related": ".xml"
-          }
-        }
-      },
       "Serilog.Sinks.File/5.0.0": {
         "type": "package",
         "dependencies": {
@@ -904,28 +888,6 @@
         "serilog.nuspec"
       ]
     },
-    "Serilog.Sinks.Debug/2.0.0": {
-      "sha512": "Y6g3OBJ4JzTyyw16fDqtFcQ41qQAydnEvEqmXjhwhgjsnG/FaJ8GUqF5ldsC/bVkK8KYmqrPhDO+tm4dF6xx4A==",
-      "type": "package",
-      "path": "serilog.sinks.debug/2.0.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "icon.png",
-        "lib/net45/Serilog.Sinks.Debug.dll",
-        "lib/net45/Serilog.Sinks.Debug.xml",
-        "lib/net46/Serilog.Sinks.Debug.dll",
-        "lib/net46/Serilog.Sinks.Debug.xml",
-        "lib/netstandard1.0/Serilog.Sinks.Debug.dll",
-        "lib/netstandard1.0/Serilog.Sinks.Debug.xml",
-        "lib/netstandard2.0/Serilog.Sinks.Debug.dll",
-        "lib/netstandard2.0/Serilog.Sinks.Debug.xml",
-        "lib/netstandard2.1/Serilog.Sinks.Debug.dll",
-        "lib/netstandard2.1/Serilog.Sinks.Debug.xml",
-        "serilog.sinks.debug.2.0.0.nupkg.sha512",
-        "serilog.sinks.debug.nuspec"
-      ]
-    },
     "Serilog.Sinks.File/5.0.0": {
       "sha512": "uwV5hdhWPwUH1szhO8PJpFiahqXmzPzJT/sOijH/kFgUx+cyoDTMM8MHD0adw9+Iem6itoibbUXHYslzXsLEAg==",
       "type": "package",
@@ -1022,11 +984,9 @@
   },
   "projectFileDependencyGroups": {
     "net8.0-windows7.0": [
-      "MaterialDesignColors >= 5.2.1",
       "MaterialDesignThemes >= 5.2.1",
       "Microsoft.AspNetCore.SignalR.Client >= 8.0.0",
       "Serilog >= 3.1.1",
-      "Serilog.Sinks.Debug >= 2.0.0",
       "Serilog.Sinks.File >= 5.0.0",
       "UsbDlpAgent.SharedModels >= 1.0.0"
     ]
@@ -1078,16 +1038,13 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "9.0.200"
     },
     "frameworks": {
       "net8.0-windows7.0": {
         "targetAlias": "net8.0-windows",
         "dependencies": {
-          "MaterialDesignColors": {
-            "target": "Package",
-            "version": "[5.2.1, )"
-          },
           "MaterialDesignThemes": {
             "target": "Package",
             "version": "[5.2.1, )"
@@ -1099,10 +1056,6 @@
           "Serilog": {
             "target": "Package",
             "version": "[3.1.1, )"
-          },
-          "Serilog.Sinks.Debug": {
-            "target": "Package",
-            "version": "[2.0.0, )"
           },
           "Serilog.Sinks.File": {
             "target": "Package",
@@ -1128,7 +1081,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.409/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

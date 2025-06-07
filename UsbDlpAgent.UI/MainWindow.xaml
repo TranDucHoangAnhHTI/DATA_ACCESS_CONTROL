@@ -5,78 +5,303 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UsbDlpAgent.UI"
         xmlns:models="clr-namespace:UsbDlpAgent.SharedModels;assembly=UsbDlpAgent.SharedModels"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="USB DLP Agent Monitor - Giám sát tác nhân"
-        Height="700"
-        Width="1200"
+        Title="USB DLP Agent"
+        Height="600"
+        Width="1000"
         Loaded="Window_Loaded"
         Closing="Window_Closing"
-        WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource MaterialDesignPaper}"
-        FontFamily="{DynamicResource MaterialDesignFont}">
-    <Grid>
+        Background="#F5F5F5">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#007ACC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="15,5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"
+                                            Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#005999"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <materialDesign:ColorZone Mode="PrimaryMid"
-                                  Grid.Row="0"
-                                  Padding="16">
-            <DockPanel>
-                <TextBlock Text="GIÁM SÁT TÁC NHÂN USB DLP"
-                           VerticalAlignment="Center"
-                           FontSize="18"
-                           FontWeight="Medium"
-                           Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"/>
-                <Button x:Name="LogoutButton"
-                        Content="Đăng xuất"
-                        DockPanel.Dock="Right"
-                        Style="{StaticResource MaterialDesignFlatButton}"
-                        Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
-                        Click="LogoutButton_Click"/>
-                <TextBlock Text="Người dùng: admin"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Right"
-                           Margin="0,0,20,0"
-                           DockPanel.Dock="Right"
-                           Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"/>
-            </DockPanel>
-        </materialDesign:ColorZone>
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock Text="USB DLP Agent Monitor"
+                      FontSize="24"
+                      FontWeight="Bold"
+                      Margin="0,0,0,5"/>
+            <TextBlock Text="Monitor and manage USB device activities in real-time"
+                      Foreground="#666666"/>
+        </StackPanel>
 
-        <TabControl Grid.Row="1"
-                    Margin="5"
-                    Style="{StaticResource MaterialDesignTabControl}">
-            <TabItem Style="{StaticResource MaterialDesignTabItem}">
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="EyeCheckOutline"
-                                                 Margin="0,0,8,0"/>
-                        <TextBlock Text="Theo dõi Thời gian thực"/>
-                    </StackPanel>
-                </TabItem.Header>
-                <local:RealtimeEventsView x:Name="RealtimeViewInstance"/>
-            </TabItem>
+        <!-- Status Bar -->
+        <Border Grid.Row="0" 
+                Background="White" 
+                BorderBrush="#E0E0E0" 
+                BorderThickness="1" 
+                CornerRadius="4" 
+                Padding="10" 
+                Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal">
+                <Ellipse Width="10" Height="10" Margin="0,0,10,0">
+                    <Ellipse.Style>
+                        <Style TargetType="Ellipse">
+                            <Setter Property="Fill" Value="Gray"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                    <Setter Property="Fill" Value="#4CAF50"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsReconnecting}" Value="True">
+                                    <Setter Property="Fill" Value="#FFC107"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Ellipse.Style>
+                </Ellipse>
+                <TextBlock x:Name="ConnectionStatusText" 
+                          Text="Status: Disconnected" 
+                          VerticalAlignment="Center"
+                          Margin="0,0,20,0"/>
+                <TextBlock x:Name="EventCountText" 
+                          Text="0 events"
+                          VerticalAlignment="Center"
+                          Foreground="#666666"/>
+            </StackPanel>
+        </Border>
 
-            <TabItem Style="{StaticResource MaterialDesignTabItem}">
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="History"
-                                                 Margin="0,0,8,0"/>
-                        <TextBlock Text="Xem lại Lịch sử"/>
-                    </StackPanel>
-                </TabItem.Header>
-                <local:HistoryView x:Name="HistoryViewInstance"/>
-            </TabItem>
-        </TabControl>
+        <!-- Filter Controls -->
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-        <StatusBar Grid.Row="2">
-            <StatusBarItem>
-                <TextBlock Name="ConnectionStatusText"
-                           Text="Trạng thái: Đang khởi tạo..."/>
-            </StatusBarItem>
-        </StatusBar>
+            <TextBox x:Name="SearchBox" 
+                     Grid.Column="0"
+                     Margin="0,0,10,0"
+                     TextChanged="SearchBox_TextChanged"
+                     ToolTip="Enter keywords to search">
+                <TextBox.Style>
+                    <Style TargetType="TextBox">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TextBox">
+                                    <Border Background="White"
+                                            BorderBrush="#E0E0E0"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
+                                        <Grid>
+                                            <TextBlock Text="Search..."
+                                                      Foreground="Gray"
+                                                      Margin="5,0,0,0"
+                                                      VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Text.Length, RelativeSource={RelativeSource TemplatedParent}}" Value="0">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <ScrollViewer x:Name="PART_ContentHost" Margin="5,0,0,0"/>
+                                        </Grid>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+
+            <ComboBox x:Name="TypeFilterCombo" 
+                      Grid.Column="1"
+                      Width="120"
+                      Margin="0,0,10,0"
+                      SelectionChanged="TypeFilterCombo_SelectionChanged"
+                      ToolTip="Filter by event type">
+                <ComboBox.Style>
+                    <Style TargetType="ComboBox">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ComboBox">
+                                    <Border Background="White"
+                                            BorderBrush="#E0E0E0"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
+                                        <Grid>
+                                            <ToggleButton x:Name="ToggleButton"
+                                                         IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                         ClickMode="Press">
+                                                <ToggleButton.Template>
+                                                    <ControlTemplate TargetType="ToggleButton">
+                                                        <Border x:Name="ToggleButtonBorder"
+                                                                Background="Transparent"
+                                                                BorderThickness="0">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition/>
+                                                                    <ColumnDefinition Width="20"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <ContentPresenter Grid.Column="0"
+                                                                                  Content="{TemplateBinding Content}"
+                                                                                  Margin="5,0,0,0"
+                                                                                  VerticalAlignment="Center"/>
+                                                                <Path Grid.Column="1"
+                                                                      x:Name="Arrow"
+                                                                      Fill="#666666"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"
+                                                                      Data="M0,0 L4,4 L8,0 Z"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </ToggleButton.Template>
+                                            </ToggleButton>
+                                            <Popup x:Name="Popup"
+                                                   AllowsTransparency="True"
+                                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                                   Placement="Bottom"
+                                                   PlacementTarget="{Binding ElementName=ToggleButton}">
+                                                <Border Background="White"
+                                                        BorderBrush="#E0E0E0"
+                                                        BorderThickness="1"
+                                                        CornerRadius="4">
+                                                    <ScrollViewer MaxHeight="200">
+                                                        <ItemsPresenter/>
+                                                    </ScrollViewer>
+                                                </Border>
+                                            </Popup>
+                                        </Grid>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ComboBox.Style>
+            </ComboBox>
+
+            <Button Grid.Column="2"
+                    Content="Clear Filters"
+                    Click="ClearFilters_Click"
+                    ToolTip="Clear all filters"/>
+        </Grid>
+
+        <!-- Event List -->
+        <Border Grid.Row="2" 
+                Background="White" 
+                BorderBrush="#E0E0E0" 
+                BorderThickness="1" 
+                CornerRadius="4">
+            <ListView x:Name="EventListView" 
+                      MouseDoubleClick="EventListView_MouseDoubleClick"
+                      BorderThickness="0">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Timestamp" Width="150">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Timestamp, StringFormat=yyyy-MM-dd HH:mm:ss.fff}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Type" Width="100">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Type}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Type}" Value="Created">
+                                                        <Setter Property="Foreground" Value="#4CAF50"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Type}" Value="Modified">
+                                                        <Setter Property="Foreground" Value="#2196F3"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Type}" Value="Deleted">
+                                                        <Setter Property="Foreground" Value="#F44336"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Type}" Value="Renamed">
+                                                        <Setter Property="Foreground" Value="#9C27B0"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="File Path" Width="400">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding FilePath}" TextTrimming="CharacterEllipsis"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Old File Path" Width="200">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding OldFilePath}" 
+                                             TextTrimming="CharacterEllipsis"
+                                             Foreground="#666666">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding OldFilePath}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Drive" Width="80">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Drive}" HorizontalAlignment="Center"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Border>
+
+        <!-- Refresh Button -->
+        <Button Grid.Row="3"
+                Content="Refresh"
+                Click="Refresh_Click"
+                HorizontalAlignment="Right"
+                Margin="0,10,0,0"
+                ToolTip="Refresh event list"/>
     </Grid>
 </Window>

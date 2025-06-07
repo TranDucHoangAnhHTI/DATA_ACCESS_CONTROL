@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "YZiC6PRep/o=",
+  "dgSpecHash": "RIFT22MBL8c=",
   "success": true,
   "projectFilePath": "C:\\UsbDlpAgent\\UsbDlpAgent.UI\\UsbDlpAgent.UI.csproj",
   "expectedPackageFiles": [
@@ -22,7 +22,6 @@
     "C:\\Users\\ADMIN\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
     "C:\\Users\\ADMIN\\.nuget\\packages\\microsoft.xaml.behaviors.wpf\\1.1.39\\microsoft.xaml.behaviors.wpf.1.1.39.nupkg.sha512",
     "C:\\Users\\ADMIN\\.nuget\\packages\\serilog\\3.1.1\\serilog.3.1.1.nupkg.sha512",
-    "C:\\Users\\ADMIN\\.nuget\\packages\\serilog.sinks.debug\\2.0.0\\serilog.sinks.debug.2.0.0.nupkg.sha512",
     "C:\\Users\\ADMIN\\.nuget\\packages\\serilog.sinks.file\\5.0.0\\serilog.sinks.file.5.0.0.nupkg.sha512",
     "C:\\Users\\ADMIN\\.nuget\\packages\\system.io.pipelines\\8.0.0\\system.io.pipelines.8.0.0.nupkg.sha512",
     "C:\\Users\\ADMIN\\.nuget\\packages\\system.threading.channels\\8.0.0\\system.threading.channels.8.0.0.nupkg.sha512"
