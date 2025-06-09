@@ -131,6 +131,17 @@ namespace UsbDlpAgent.Services
         {
             _logger.LogInformation("Worker: USB Device Arrived - Drive: {Drive}, Volume: {Volume}", e.DriveLetter, e.VolumeName);
             string pathToMonitor = e.DriveLetter.EndsWith("\\") ? e.DriveLetter : e.DriveLetter + "\\";
+            
+            // Tạo và gửi sự kiện USB được cắm vào
+            var activity = new FileActivity
+            {
+                Timestamp = DateTime.UtcNow,
+                Type = ActivityType.UsbDeviceArrived,
+                FilePath = pathToMonitor,
+                Drive = e.DriveLetter,
+            };
+            _alertService.TriggerAlert(activity);
+
             if (Directory.Exists(pathToMonitor)) // Ensure drive is accessible
             {
                 _fsWatcherManager.StartMonitoringDrive(pathToMonitor);
@@ -145,6 +156,17 @@ namespace UsbDlpAgent.Services
         {
             _logger.LogInformation("Worker: USB Device Removed - Drive: {Drive}, Volume: {Volume}", e.DriveLetter, e.VolumeName);
             string pathToStopMonitoring = e.DriveLetter.EndsWith("\\") ? e.DriveLetter : e.DriveLetter + "\\";
+
+            // Tạo và gửi sự kiện USB được rút ra
+            var activity = new FileActivity
+            {
+                Timestamp = DateTime.UtcNow,
+                Type = ActivityType.UsbDeviceRemoved,
+                FilePath = pathToStopMonitoring,
+                Drive = e.DriveLetter,
+            };
+            _alertService.TriggerAlert(activity);
+
             _fsWatcherManager.StopMonitoringDrive(pathToStopMonitoring);
         }
 

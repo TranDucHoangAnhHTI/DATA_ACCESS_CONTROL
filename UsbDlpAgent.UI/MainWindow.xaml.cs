@@ -18,6 +18,15 @@ using System.Drawing; // For SystemIcons
 using System.Windows.Interop; // For window handle
 using WinForms = System.Windows.Forms;
 using WinFormsRectangle = System.Drawing.Rectangle;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System.IO;
+using Microsoft.Win32;
+using MessageBox = System.Windows.MessageBox;
+using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
+using Mouse = System.Windows.Input.Mouse;
+using PdfFont = iTextSharp.text.Font;
+using System.Text;
 
 namespace UsbDlpAgent.UI
 {
@@ -31,7 +40,7 @@ namespace UsbDlpAgent.UI
         private bool _isInitialized;
         private readonly CultureInfo _viCulture = new CultureInfo("vi-VN");
         private readonly TimeZoneInfo _vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-        private const string HubUrl = "http://localhost:5121/dlphub"; // Cập nhật URL hub
+        private const string HubUrl = "http://localhost:5124/dlphub"; // Cập nhật URL hub
         private bool _showNotifications = true;
         private bool _autoScroll = true;
 
@@ -113,7 +122,9 @@ namespace UsbDlpAgent.UI
         {
             // Đảm bảo ComboBox trống trước khi thiết lập ItemsSource
             TypeFilterCombo.Items.Clear();
+            DriveFilterCombo.Items.Clear();
 
+            // Khởi tạo bộ lọc loại sự kiện
             var filterItems = new[]
             {
                 new FilterItem { Value = (ActivityType?)null, Display = "Tất cả loại" },
@@ -121,118 +132,52 @@ namespace UsbDlpAgent.UI
                 new FilterItem { Value = ActivityType.Modified, Display = "Sửa đổi" },
                 new FilterItem { Value = ActivityType.Deleted, Display = "Xóa" },
                 new FilterItem { Value = ActivityType.Renamed, Display = "Đổi tên" },
-                new FilterItem { Value = ActivityType.MovedToUsb, Display = "Di chuyển vào USB" }
+                new FilterItem { Value = ActivityType.MovedToUsb, Display = "Di chuyển vào USB" },
+                new FilterItem { Value = ActivityType.UsbDeviceArrived, Display = "USB được cắm vào" },
+                new FilterItem { Value = ActivityType.UsbDeviceRemoved, Display = "USB được rút ra" }
             };
 
             TypeFilterCombo.ItemsSource = filterItems;
             TypeFilterCombo.DisplayMemberPath = "Display";
             TypeFilterCombo.SelectedValuePath = "Value";
             TypeFilterCombo.SelectedIndex = 0;
+
+            // Khởi tạo bộ lọc ổ đĩa
+            var driveItems = new List<FilterItem<string>>
+            {
+                new FilterItem<string> { Value = null, Display = "Tất cả ổ đĩa" }
+            };
+            DriveFilterCombo.ItemsSource = driveItems;
+            DriveFilterCombo.DisplayMemberPath = "Display";
+            DriveFilterCombo.SelectedValuePath = "Value";
+            DriveFilterCombo.SelectedIndex = 0;
+
+            // Khởi tạo bộ lọc thời gian
+            TimeFilterCombo.SelectedIndex = 0;
         }
 
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        private void UpdateDriveFilter()
         {
-            await ConnectToServer();
+            if (!_isInitialized || DriveFilterCombo.ItemsSource is not List<FilterItem<string>> driveItems)
+                return;
+
+            // Lấy danh sách ổ đĩa duy nhất từ EventLog
+            var uniqueDrives = EventLog
+                .Select(a => a.Drive)
+                .Distinct()
+                .OrderBy(d => d)
+                .ToList();
+
+            // Cập nhật danh sách ổ đĩa trong ComboBox
+            driveItems.Clear();
+            driveItems.Add(new FilterItem<string> { Value = null, Display = "Tất cả ổ đĩa" });
+            driveItems.AddRange(uniqueDrives.Select(d => new FilterItem<string> { Value = d, Display = d }));
+
+            // Refresh ComboBox
+            DriveFilterCombo.Items.Refresh();
         }
 
-        private async Task ConnectToServer()
-        {
-            try
-            {
-                if (_hubConnection == null)
-                {
-                    _hubConnection = new HubConnectionBuilder()
-                        .WithUrl(HubUrl)
-                        .WithAutomaticReconnect()
-                        .Build();
-
-                    if (_hubConnection != null)
-                    {
-                        // Xử lý sự kiện nhận lịch sử
-                        _hubConnection.On<List<FileActivity>>("ReceiveHistory", history =>
-                        {
-                            Dispatcher.Invoke(() =>
-                            {
-                                EventLog.Clear();
-                                foreach (var activity in history.OrderByDescending(a => a.Timestamp))
-                                {
-                                    EventLog.Add(activity);
-                                }
-                                UpdateEventCount();
-                            });
-                        });
-
-                        // Xử lý sự kiện nhận hoạt động mới
-                        _hubConnection.On<FileActivity>("ReceiveFileActivity", activity =>
-                        {
-                            Dispatcher.Invoke(() =>
-                            {
-                                EventLog.Insert(0, activity);
-                                if (EventLog.Count > 200)
-                                {
-                                    EventLog.RemoveAt(EventLog.Count - 1);
-                                }
-                                UpdateEventCount();
-
-                                // Hiển thị thông báo và cuộn lên đầu
-                                var activityType = activity.Type switch
-                                {
-                                    ActivityType.Created => "Tạo mới",
-                                    ActivityType.Modified => "Sửa đổi",
-                                    ActivityType.Deleted => "Xóa",
-                                    ActivityType.Renamed => "Đổi tên",
-                                    ActivityType.MovedToUsb => "Di chuyển vào USB",
-                                    _ => "Không xác định"
-                                };
-
-                                ShowNotification(
-                                    "Sự kiện mới",
-                                    $"{activityType}: {activity.FilePath}\nỔ đĩa: {activity.Drive}"
-                                );
-                                ScrollToTop();
-                            });
-                        });
-
-                        // Đăng ký các sự kiện kết nối
-                        _hubConnection.Closed += HubConnection_Closed;
-                        _hubConnection.Reconnecting += HubConnection_Reconnecting;
-                        _hubConnection.Reconnected += HubConnection_Reconnected;
-
-                        await _hubConnection.StartAsync();
-                        UpdateConnectionStatus(true);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Lỗi kết nối đến máy chủ: {ex.Message}", "Lỗi kết nối", MessageBoxButton.OK, MessageBoxImage.Error);
-                UpdateConnectionStatus(false);
-            }
-        }
-
-        private async Task RequestHistory(int count = 50)
-        {
-            try
-            {
-                if (_hubConnection?.State == HubConnectionState.Connected)
-                {
-                    await _hubConnection.InvokeAsync("RequestHistory", count);
-                }
-                else
-                {
-                    System.Windows.MessageBox.Show("Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối.",
-                                  "Lỗi kết nối",
-                                  MessageBoxButton.OK,
-                                  MessageBoxImage.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Lỗi khi yêu cầu lịch sử: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void DriveFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isInitialized)
             {
@@ -240,7 +185,7 @@ namespace UsbDlpAgent.UI
             }
         }
 
-        private void TypeFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void TimeFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isInitialized)
             {
@@ -254,6 +199,8 @@ namespace UsbDlpAgent.UI
             {
                 SearchBox.Clear();
                 TypeFilterCombo.SelectedIndex = 0;
+                DriveFilterCombo.SelectedIndex = 0;
+                TimeFilterCombo.SelectedIndex = 0;
             }
         }
 
@@ -276,12 +223,52 @@ namespace UsbDlpAgent.UI
                         if (activity.Type != selectedType) return false;
                     }
 
-                    var searchText = SearchBox.Text.ToLower();
-                    var matchesSearch = string.IsNullOrEmpty(searchText) ||
-                                      activity.FilePath?.ToLower().Contains(searchText) == true ||
-                                      activity.OldFilePath?.ToLower().Contains(searchText) == true;
+                    // Lọc theo ổ đĩa
+                    if (DriveFilterCombo.SelectedValue is string selectedDrive && !string.IsNullOrEmpty(selectedDrive))
+                    {
+                        if (activity.Drive != selectedDrive) return false;
+                    }
 
-                    return matchesSearch;
+                    // Lọc theo thời gian
+                    if (TimeFilterCombo.SelectedItem is ComboBoxItem selectedTime)
+                    {
+                        var now = DateTime.UtcNow;
+                        var activityTime = activity.Timestamp;
+                        var timeRange = selectedTime.Tag?.ToString();
+
+                        switch (timeRange)
+                        {
+                            case "today":
+                                if (activityTime.Date != now.Date) return false;
+                                break;
+                            case "yesterday":
+                                if (activityTime.Date != now.Date.AddDays(-1)) return false;
+                                break;
+                            case "thisweek":
+                                var startOfWeek = now.Date.AddDays(-(int)now.DayOfWeek);
+                                if (activityTime.Date < startOfWeek || activityTime.Date > now.Date) return false;
+                                break;
+                            case "thismonth":
+                                if (activityTime.Year != now.Year || activityTime.Month != now.Month) return false;
+                                break;
+                        }
+                    }
+
+                    // Tìm kiếm theo từ khóa
+                    var searchText = SearchBox.Text.ToLower();
+                    if (!string.IsNullOrEmpty(searchText))
+                    {
+                        // Tìm kiếm trong tên file, đường dẫn, ổ đĩa
+                        var matchesSearch = 
+                            (activity.FilePath?.ToLower().Contains(searchText) == true) ||
+                            (activity.OldFilePath?.ToLower().Contains(searchText) == true) ||
+                            (activity.Drive?.ToLower().Contains(searchText) == true) ||
+                            (GetVietnameseEventType(activity.Type).ToLower().Contains(searchText));
+
+                        if (!matchesSearch) return false;
+                    }
+
+                    return true;
                 };
 
                 UpdateEventCount();
@@ -316,38 +303,15 @@ namespace UsbDlpAgent.UI
             {
                 // Vô hiệu hóa nút trong khi đang cập nhật
                 RefreshButton.IsEnabled = false;
-
-                // Bắt đầu animation xoay
-                var animation = new DoubleAnimation
-                {
-                    From = 0,
-                    To = 360,
-                    Duration = TimeSpan.FromSeconds(1),
-                    RepeatBehavior = RepeatBehavior.Forever
-                };
-                RefreshIconRotation.BeginAnimation(RotateTransform.AngleProperty, animation);
-
-                // Xóa dữ liệu cũ và yêu cầu dữ liệu mới từ server
-                await Dispatcher.InvokeAsync(async () =>
-                {
-                    EventLog.Clear();
-                    UpdateEventCount();
-                    // Reset các bộ lọc
-                    TypeFilterCombo.SelectedIndex = 0;
-                    SearchBox.Clear();
-                    
-                    // Yêu cầu dữ liệu mới từ server
-                    await RequestHistory();
-                });
+                // Không cần animation nữa vì đã thay đổi UI
+                await RequestHistory();
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Lỗi khi cập nhật dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi khi làm mới: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
-                // Dừng animation và kích hoạt lại nút
-                RefreshIconRotation.BeginAnimation(RotateTransform.AngleProperty, null);
                 RefreshButton.IsEnabled = true;
             }
         }
@@ -389,6 +353,8 @@ namespace UsbDlpAgent.UI
                 ActivityType.Deleted => "Xóa",
                 ActivityType.Renamed => "Đổi tên",
                 ActivityType.MovedToUsb => "Di chuyển vào USB",
+                ActivityType.UsbDeviceArrived => "USB được cắm vào",
+                ActivityType.UsbDeviceRemoved => "USB được rút ra",
                 _ => type.ToString()
             };
         }
@@ -504,7 +470,7 @@ namespace UsbDlpAgent.UI
         private void ScrollToTop()
         {
             if (!AutoScroll) return;
-            
+
             if (EventListView.Items.Count > 0)
             {
                 EventListView.ScrollIntoView(EventListView.Items[0]);
@@ -517,11 +483,245 @@ namespace UsbDlpAgent.UI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        // Thêm class FilterItem để định nghĩa kiểu dữ liệu cho các item trong ComboBox
-        private class FilterItem
+        // Thêm class FilterItem generic để hỗ trợ các kiểu dữ liệu khác nhau
+        private class FilterItem<T>
         {
-            public ActivityType? Value { get; set; }
+            public T? Value { get; set; }
             public string Display { get; set; } = string.Empty;
+        }
+
+        // Alias cho FilterItem<ActivityType?> để giữ tương thích với code cũ
+        private class FilterItem : FilterItem<ActivityType?>
+        {
+        }
+
+        private async void ExportPdfButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "PDF files (*.pdf)|*.pdf",
+                    DefaultExt = "pdf",
+                    FileName = $"USB_DLP_Report_{DateTime.Now:yyyyMMdd_HHmmss}.pdf"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    ExportPdfButton.IsEnabled = false;
+                    Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
+
+                    await Task.Run(() =>
+                    {
+                        using (var document = new Document(PageSize.A4.Rotate()))
+                        {
+                            using (var writer = PdfWriter.GetInstance(document, new FileStream(saveFileDialog.FileName, FileMode.Create, FileAccess.Write)))
+                            {
+                                document.Open();
+
+                                // Add title
+                                var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 16);
+                                var title = new Paragraph("USB DLP Activity Report", titleFont);
+                                title.Alignment = Element.ALIGN_CENTER;
+                                title.SpacingAfter = 20f;
+                                document.Add(title);
+
+                                // Add timestamp
+                                var dateFont = FontFactory.GetFont(FontFactory.HELVETICA, 10);
+                                var timestamp = new Paragraph($"Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}", dateFont);
+                                timestamp.Alignment = Element.ALIGN_CENTER;
+                                timestamp.SpacingAfter = 20f;
+                                document.Add(timestamp);
+
+                                // Create table
+                                var table = new PdfPTable(5);
+                                table.WidthPercentage = 100;
+                                table.SetWidths(new float[] { 2f, 2f, 1.5f, 3f, 3f });
+
+                                // Add headers
+                                var headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10);
+                                var headers = new[] { "Time", "Type", "Drive", "File Path", "Details" };
+                                foreach (var header in headers)
+                                {
+                                    table.AddCell(new PdfPCell(new Phrase(header, headerFont))
+                                    {
+                                        BackgroundColor = new BaseColor(240, 240, 240),
+                                        HorizontalAlignment = Element.ALIGN_CENTER,
+                                        Padding = 5f
+                                    });
+                                }
+
+                                // Add data rows
+                                var dataFont = FontFactory.GetFont(FontFactory.HELVETICA, 9);
+                                foreach (var activity in EventLog)
+                                {
+                                    table.AddCell(new PdfPCell(new Phrase(activity.Timestamp.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"), dataFont)) { Padding = 5f });
+                                    table.AddCell(new PdfPCell(new Phrase(GetActivityTypeText(activity.Type), dataFont)) { Padding = 5f });
+                                    table.AddCell(new PdfPCell(new Phrase(activity.Drive ?? "N/A", dataFont)) { Padding = 5f });
+                                    table.AddCell(new PdfPCell(new Phrase(activity.FilePath ?? "N/A", dataFont)) { Padding = 5f });
+
+                                    var details = new StringBuilder();
+                                    if (!string.IsNullOrEmpty(activity.OldFilePath))
+                                    {
+                                        details.AppendLine($"Old Path: {activity.OldFilePath}");
+                                    }
+                                    table.AddCell(new PdfPCell(new Phrase(details.ToString().TrimEnd(), dataFont)) { Padding = 5f });
+                                }
+
+                                document.Add(table);
+
+                                // Add summary
+                                var summaryFont = FontFactory.GetFont(FontFactory.HELVETICA, 10);
+                                var summary = new Paragraph($"Total Events: {EventLog.Count}", summaryFont);
+                                summary.Alignment = Element.ALIGN_RIGHT;
+                                summary.SpacingBefore = 20f;
+                                document.Add(summary);
+                            }
+                        }
+                    });
+
+                    System.Windows.MessageBox.Show("Report exported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error exporting PDF: {ex.Message}", "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                ExportPdfButton.IsEnabled = true;
+                Mouse.OverrideCursor = null;
+            }
+        }
+
+        private string GetActivityTypeText(ActivityType type)
+        {
+            return type switch
+            {
+                ActivityType.Created => "Created",
+                ActivityType.Modified => "Modified",
+                ActivityType.Deleted => "Deleted",
+                ActivityType.Renamed => "Renamed",
+                ActivityType.MovedToUsb => "Moved to USB",
+                ActivityType.UsbDeviceArrived => "USB Device Connected",
+                ActivityType.UsbDeviceRemoved => "USB Device Disconnected",
+                _ => "Unknown"
+            };
+        }
+
+        private void OnReceiveHistory(List<FileActivity> history)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                EventLog.Clear();
+                foreach (var activity in history.OrderByDescending(a => a.Timestamp))
+                {
+                    EventLog.Add(activity);
+                }
+                UpdateEventCount();
+                UpdateDriveFilter();
+            });
+        }
+
+        private void OnReceiveNewEvent(FileActivity activity)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                EventLog.Insert(0, activity);
+                if (EventLog.Count > 200)
+                {
+                    EventLog.RemoveAt(EventLog.Count - 1);
+                }
+                UpdateEventCount();
+                UpdateDriveFilter();
+
+                var activityType = GetVietnameseEventType(activity.Type);
+
+                ShowNotification(
+                    "Sự kiện mới",
+                    $"{activityType}: {activity.FilePath}\nỔ đĩa: {activity.Drive}"
+                );
+                ScrollToTop();
+            });
+        }
+
+        private async Task RequestHistory(int count = 50)
+        {
+            try
+            {
+                if (_hubConnection?.State == HubConnectionState.Connected)
+                {
+                    await _hubConnection.InvokeAsync("RequestHistory", count);
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối.",
+                                  "Lỗi kết nối",
+                                  MessageBoxButton.OK,
+                                  MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Lỗi khi yêu cầu lịch sử: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            await ConnectToServer();
+        }
+
+        private async Task ConnectToServer()
+        {
+            try
+            {
+                if (_hubConnection == null)
+                {
+                    _hubConnection = new HubConnectionBuilder()
+                        .WithUrl(HubUrl)
+                        .WithAutomaticReconnect()
+                        .Build();
+
+                    if (_hubConnection != null)
+                    {
+                        // Xử lý sự kiện nhận lịch sử
+                        _hubConnection.On<List<FileActivity>>("ReceiveHistory", OnReceiveHistory);
+
+                        // Xử lý sự kiện nhận hoạt động mới
+                        _hubConnection.On<FileActivity>("ReceiveNewEvent", OnReceiveNewEvent);
+
+                        // Đăng ký các sự kiện kết nối
+                        _hubConnection.Closed += HubConnection_Closed;
+                        _hubConnection.Reconnecting += HubConnection_Reconnecting;
+                        _hubConnection.Reconnected += HubConnection_Reconnected;
+
+                        await _hubConnection.StartAsync();
+                        UpdateConnectionStatus(true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Lỗi kết nối đến máy chủ: {ex.Message}", "Lỗi kết nối", MessageBoxButton.OK, MessageBoxImage.Error);
+                UpdateConnectionStatus(false);
+            }
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_isInitialized)
+            {
+                ApplyFilters();
+            }
+        }
+
+        private void TypeFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isInitialized)
+            {
+                ApplyFilters();
+            }
         }
     }
 }

@@ -9,6 +9,8 @@ C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\UsbDlpAgent.UI.de
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\UsbDlpAgent.UI.runtimeconfig.json
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\UsbDlpAgent.UI.dll
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\UsbDlpAgent.UI.pdb
+C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\BouncyCastle.Cryptography.dll
+C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\iTextSharp.LGPLv2.Core.dll
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\MaterialDesignColors.dll
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\MaterialDesignThemes.Wpf.dll
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\Microsoft.AspNetCore.Connections.Abstractions.dll
@@ -28,7 +30,9 @@ C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\Microsoft.Extensi
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\Microsoft.Xaml.Behaviors.dll
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\Serilog.dll
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\Serilog.Sinks.File.dll
+C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\SkiaSharp.dll
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\System.IO.Pipelines.dll
+C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\libSkiaSharp.dll
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\Microsoft.CSharp.dll
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\Microsoft.VisualBasic.Core.dll
 C:\UsbDlpAgent\UsbDlpAgent.UI\bin\Debug\net8.0-windows\win-x64\Microsoft.Win32.Primitives.dll

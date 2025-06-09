@@ -136,19 +136,21 @@
         </Border>
 
         <!-- Filter Controls -->
-        <Grid Grid.Row="1"
-                Margin="0,0,0,10">
+        <Grid Grid.Row="1" Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
+            <!-- Tìm kiếm theo từ khóa -->
             <TextBox x:Name="SearchBox"
                      Grid.Column="0"
                      Margin="0,0,10,0"
                      TextChanged="SearchBox_TextChanged"
-                     ToolTip="Nhập từ khóa để tìm kiếm">
+                     ToolTip="Nhập từ khóa để tìm kiếm (tên file, đường dẫn, ổ đĩa)">
                 <TextBox.Style>
                     <Style TargetType="TextBox">
                         <Setter Property="Template">
@@ -188,65 +190,53 @@
                 </TextBox.Style>
             </TextBox>
 
+            <!-- Lọc theo loại sự kiện -->
             <ComboBox x:Name="TypeFilterCombo"
                       Grid.Column="1"
-                      Margin="5"
+                      Margin="0,0,10,0"
+                      Width="150"
                       ToolTip="Lọc theo loại hoạt động"
                       SelectionChanged="TypeFilterCombo_SelectionChanged">
             </ComboBox>
 
-            <Button x:Name="ClearFiltersButton"
-                    Grid.Column="2"
-                    Margin="5"
-                    Click="ClearFilters_Click"
-                    ToolTip="Xóa bộ lọc">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Background"
-                                Value="#FFE0E0"/>
-                        <Setter Property="Foreground"
-                                Value="#D32F2F"/>
-                        <Setter Property="BorderBrush"
-                                Value="#FFCDD2"/>
-                        <Setter Property="Padding"
-                                Value="10,5"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="1"
-                                            CornerRadius="4">
-                                        <ContentPresenter HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver"
-                                                Value="True">
-                                            <Setter Property="Background"
-                                                    Value="#FFCDD2"/>
-                                        </Trigger>
-                                        <Trigger Property="IsPressed"
-                                                Value="True">
-                                            <Setter Property="Background"
-                                                    Value="#EF9A9A"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Xóa bộ lọc"
-                            Margin="0,0,5,0"/>
-                    <Path Data="M0,0 L8,8 M0,8 L8,0"
-                          Stroke="#D32F2F"
-                          StrokeThickness="1.5"
-                          Width="8"
-                          Height="8"/>
-                </StackPanel>
-            </Button>
+            <!-- Lọc theo ổ đĩa -->
+            <ComboBox x:Name="DriveFilterCombo"
+                      Grid.Column="2"
+                      Margin="0,0,10,0"
+                      Width="100"
+                      ToolTip="Lọc theo ổ đĩa"
+                      SelectionChanged="DriveFilterCombo_SelectionChanged">
+            </ComboBox>
+
+            <!-- Lọc theo thời gian -->
+            <ComboBox x:Name="TimeFilterCombo"
+                      Grid.Column="3"
+                      Margin="0,0,10,0"
+                      Width="150"
+                      ToolTip="Lọc theo thời gian"
+                      SelectionChanged="TimeFilterCombo_SelectionChanged">
+                <ComboBoxItem Content="Tất cả thời gian" Tag="all"/>
+                <ComboBoxItem Content="Hôm nay" Tag="today"/>
+                <ComboBoxItem Content="Hôm qua" Tag="yesterday"/>
+                <ComboBoxItem Content="Tuần này" Tag="thisweek"/>
+                <ComboBoxItem Content="Tháng này" Tag="thismonth"/>
+            </ComboBox>
+
+            <!-- Các nút chức năng -->
+            <StackPanel Grid.Column="4" Orientation="Horizontal">
+                <Button x:Name="RefreshButton" Click="RefreshButton_Click" ToolTip="Làm mới danh sách" Margin="0,0,5,0">
+                    <Path Data="M4,12 A8,8 0 1,1 12,20 A8,8 0 1,1 4,12 M12,4 L12,1 M12,23 L12,20 M20,12 L23,12 M1,12 L4,12" 
+                          Stroke="White" StrokeThickness="2" Width="16" Height="16"/>
+                </Button>
+                <Button x:Name="ExportPdfButton" Click="ExportPdfButton_Click" ToolTip="Xuất PDF" Margin="0,0,5,0">
+                    <Path Data="M19,9H15V3H9V9H5L12,16L19,9M5,18V20H19V18H5Z" 
+                          Fill="White" Width="16" Height="16"/>
+                </Button>
+                <Button x:Name="ClearFiltersButton" Click="ClearFilters_Click" ToolTip="Xóa bộ lọc">
+                    <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" 
+                          Fill="White" Width="16" Height="16"/>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <!-- Event List -->
@@ -354,64 +344,5 @@
                 </ListView.View>
             </ListView>
         </Border>
-
-        <!-- Refresh Button -->
-        <Button x:Name="RefreshButton"
-                Grid.Row="3"
-                Margin="0,10,0,0"
-                Click="RefreshButton_Click"
-                ToolTip="Cập nhật dữ liệu mới nhất từ server">
-            <Button.Style>
-                <Style TargetType="Button">
-                    <Setter Property="Background"
-                            Value="#E3F2FD"/>
-                    <Setter Property="Foreground"
-                            Value="#1976D2"/>
-                    <Setter Property="BorderBrush"
-                            Value="#BBDEFB"/>
-                    <Setter Property="Padding"
-                            Value="10,5"/>
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="Button">
-                                <Border Background="{TemplateBinding Background}"
-                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="4">
-                                    <ContentPresenter HorizontalAlignment="Center"
-                                                      VerticalAlignment="Center"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver"
-                                            Value="True">
-                                        <Setter Property="Background"
-                                                Value="#BBDEFB"/>
-                                    </Trigger>
-                                    <Trigger Property="IsPressed"
-                                            Value="True">
-                                        <Setter Property="Background"
-                                                Value="#90CAF9"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </Button.Style>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Làm mới"
-                        Margin="0,0,5,0"/>
-                <Path Data="M0,0 L8,4 L0,8 Z"
-                      Fill="#1976D2"
-                      Width="8"
-                      Height="8"
-                      RenderTransformOrigin="0.5,0.5">
-                    <Path.RenderTransform>
-                        <RotateTransform x:Name="RefreshIconRotation"
-                                Angle="0"/>
-                    </Path.RenderTransform>
-                </Path>
-            </StackPanel>
-        </Button>
     </Grid>
 </Window>

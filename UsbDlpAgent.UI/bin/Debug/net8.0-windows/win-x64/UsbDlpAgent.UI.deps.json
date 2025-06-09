@@ -16,6 +16,7 @@
           "Serilog.Sinks.File": "5.0.0",
           "System.Drawing.Common": "8.0.0",
           "UsbDlpAgent.SharedModels": "1.0.0",
+          "iTextSharp.LGPLv2.Core": "3.7.4",
           "runtimepack.Microsoft.NETCore.App.Runtime.win-x64": "8.0.14",
           "runtimepack.Microsoft.WindowsDesktop.App.Runtime.win-x64": "8.0.14"
         },
@@ -968,6 +969,26 @@
           }
         }
       },
+      "BouncyCastle.Cryptography/2.6.1": {
+        "runtime": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.6.1.59591"
+          }
+        }
+      },
+      "iTextSharp.LGPLv2.Core/3.7.4": {
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.6.1",
+          "SkiaSharp": "3.119.0"
+        },
+        "runtime": {
+          "lib/net8.0/iTextSharp.LGPLv2.Core.dll": {
+            "assemblyVersion": "3.7.4.0",
+            "fileVersion": "3.7.4.0"
+          }
+        }
+      },
       "MaterialDesignColors/5.2.1": {
         "runtime": {
           "lib/net8.0/MaterialDesignColors.dll": {
@@ -1174,6 +1195,26 @@
           }
         }
       },
+      "SkiaSharp/3.119.0": {
+        "dependencies": {
+          "SkiaSharp.NativeAssets.Win32": "3.119.0",
+          "SkiaSharp.NativeAssets.macOS": "3.119.0"
+        },
+        "runtime": {
+          "lib/net8.0/SkiaSharp.dll": {
+            "assemblyVersion": "3.119.0.0",
+            "fileVersion": "3.119.0.0"
+          }
+        }
+      },
+      "SkiaSharp.NativeAssets.macOS/3.119.0": {},
+      "SkiaSharp.NativeAssets.Win32/3.119.0": {
+        "native": {
+          "runtimes/win-x64/native/libSkiaSharp.dll": {
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
       "System.Drawing.Common/8.0.0": {
         "dependencies": {
           "Microsoft.Win32.SystemEvents": "8.0.0"
@@ -1213,6 +1254,20 @@
       "type": "runtimepack",
       "serviceable": false,
       "sha512": ""
+    },
+    "BouncyCastle.Cryptography/2.6.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vZsG2YILhthgRqO+ZVgRff4ZFKKTl0v7kqaVBLCtRvpREhfBP33pcWrdA3PRYgWuFL1RxiUFvjMUHTdBZlJcoA==",
+      "path": "bouncycastle.cryptography/2.6.1",
+      "hashPath": "bouncycastle.cryptography.2.6.1.nupkg.sha512"
+    },
+    "iTextSharp.LGPLv2.Core/3.7.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-uMkrgvanNij/sC854OxsD5BZJL8sq3OihBs58pHblmlPHBZ3nVKI2HZRIQcarwUkc4GokaNOArZv7toQJV8HAQ==",
+      "path": "itextsharp.lgplv2.core/3.7.4",
+      "hashPath": "itextsharp.lgplv2.core.3.7.4.nupkg.sha512"
     },
     "MaterialDesignColors/5.2.1": {
       "type": "package",
@@ -1360,6 +1415,27 @@
       "sha512": "sha512-uwV5hdhWPwUH1szhO8PJpFiahqXmzPzJT/sOijH/kFgUx+cyoDTMM8MHD0adw9+Iem6itoibbUXHYslzXsLEAg==",
       "path": "serilog.sinks.file/5.0.0",
       "hashPath": "serilog.sinks.file.5.0.0.nupkg.sha512"
+    },
+    "SkiaSharp/3.119.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-gR9yVoOta2Mc1Rxt15LD65AckfHMfwjIs/3kkD59C9bT2nYYISsE6uz3t4aMPNHA6CgsIL0Ssn+jE5OVilZ1yw==",
+      "path": "skiasharp/3.119.0",
+      "hashPath": "skiasharp.3.119.0.nupkg.sha512"
+    },
+    "SkiaSharp.NativeAssets.macOS/3.119.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-YE1vNn0Nyw2PWtv7hw1PYkKJO0itFiQp9vSqGppZUKzQJqwp28a2jgdCMPfYtOiR8KCnDgZqQoynqJRRaE2ZVg==",
+      "path": "skiasharp.nativeassets.macos/3.119.0",
+      "hashPath": "skiasharp.nativeassets.macos.3.119.0.nupkg.sha512"
+    },
+    "SkiaSharp.NativeAssets.Win32/3.119.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-IwC9yx36lOdXVT2DjgmWHl1qkVspfj8ctd4+li8CNnvqdfaTolXCOh6TLznURcPAvzatx9K/tLOB7zT6T8EA9w==",
+      "path": "skiasharp.nativeassets.win32/3.119.0",
+      "hashPath": "skiasharp.nativeassets.win32.3.119.0.nupkg.sha512"
     },
     "System.Drawing.Common/8.0.0": {
       "type": "package",

@@ -7,7 +7,9 @@ namespace UsbDlpAgent.SharedModels
         Modified,
         Deleted,
         Renamed,
-        MovedToUsb
+        MovedToUsb,
+        UsbDeviceArrived,
+        UsbDeviceRemoved
         // Bạn có thể thêm các loại khác nếu cần
     }
 

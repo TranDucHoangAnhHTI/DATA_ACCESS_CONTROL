@@ -246,3 +246,6 @@ System.Windows.Markup.XamlParseException: 'The invocation of the constructor on 
 2025-06-07 16:45:45.558 +07:00 [INF] Starting application...
 2025-06-07 16:45:45.577 +07:00 [DBG] Application startup arguments: 
 2025-06-07 16:46:06.101 +07:00 [INF] Application is shutting down with exit code: 0
+2025-06-07 16:58:07.082 +07:00 [INF] Starting application...
+2025-06-07 16:58:07.100 +07:00 [DBG] Application startup arguments: 
+2025-06-07 17:01:55.979 +07:00 [INF] Application is shutting down with exit code: 0
