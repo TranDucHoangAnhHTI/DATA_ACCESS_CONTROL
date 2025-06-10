@@ -152,8 +152,9 @@ namespace UsbDlpAgent.UI
             DriveFilterCombo.SelectedValuePath = "Value";
             DriveFilterCombo.SelectedIndex = 0;
 
-            // Khởi tạo bộ lọc thời gian
-            TimeFilterCombo.SelectedIndex = 0;
+            // Khởi tạo DatePicker
+            StartDatePicker.SelectedDate = null;
+            EndDatePicker.SelectedDate = null;
         }
 
         private void UpdateDriveFilter()
@@ -185,23 +186,14 @@ namespace UsbDlpAgent.UI
             }
         }
 
-        private void TimeFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_isInitialized)
-            {
-                ApplyFilters();
-            }
-        }
-
         private void ClearFilters_Click(object sender, RoutedEventArgs e)
         {
-            if (_isInitialized)
-            {
-                SearchBox.Clear();
-                TypeFilterCombo.SelectedIndex = 0;
-                DriveFilterCombo.SelectedIndex = 0;
-                TimeFilterCombo.SelectedIndex = 0;
-            }
+            SearchBox.Text = string.Empty;
+            TypeFilterCombo.SelectedIndex = 0;
+            DriveFilterCombo.SelectedIndex = 0;
+            StartDatePicker.SelectedDate = null;
+            EndDatePicker.SelectedDate = null;
+            ApplyFilters();
         }
 
         private void ApplyFilters()
@@ -230,28 +222,11 @@ namespace UsbDlpAgent.UI
                     }
 
                     // Lọc theo thời gian
-                    if (TimeFilterCombo.SelectedItem is ComboBoxItem selectedTime)
+                    if (StartDatePicker.SelectedDate.HasValue && EndDatePicker.SelectedDate.HasValue)
                     {
-                        var now = DateTime.UtcNow;
-                        var activityTime = activity.Timestamp;
-                        var timeRange = selectedTime.Tag?.ToString();
-
-                        switch (timeRange)
-                        {
-                            case "today":
-                                if (activityTime.Date != now.Date) return false;
-                                break;
-                            case "yesterday":
-                                if (activityTime.Date != now.Date.AddDays(-1)) return false;
-                                break;
-                            case "thisweek":
-                                var startOfWeek = now.Date.AddDays(-(int)now.DayOfWeek);
-                                if (activityTime.Date < startOfWeek || activityTime.Date > now.Date) return false;
-                                break;
-                            case "thismonth":
-                                if (activityTime.Year != now.Year || activityTime.Month != now.Month) return false;
-                                break;
-                        }
+                        var startDate = StartDatePicker.SelectedDate.Value.Date;
+                        var endDate = EndDatePicker.SelectedDate.Value.Date.AddDays(1).AddTicks(-1);
+                        if (activity.Timestamp < startDate || activity.Timestamp > endDate) return false;
                     }
 
                     // Tìm kiếm theo từ khóa
@@ -722,6 +697,19 @@ namespace UsbDlpAgent.UI
             {
                 ApplyFilters();
             }
+        }
+
+        private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isInitialized)
+            {
+                ApplyFilters();
+            }
+        }
+
+        private void UpdateStatusBar()
+        {
+            // Implementation of UpdateStatusBar method
         }
     }
 }

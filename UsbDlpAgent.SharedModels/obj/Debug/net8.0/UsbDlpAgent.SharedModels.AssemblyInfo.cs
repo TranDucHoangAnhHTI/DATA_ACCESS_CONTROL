@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UsbDlpAgent.SharedModels")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0b935a65bf45aefda1e10ce5f056e62ccd25c912")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5eeac82320a0e271cad2cd1c7f69333a02f34e65")]
 [assembly: System.Reflection.AssemblyProductAttribute("UsbDlpAgent.SharedModels")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UsbDlpAgent.SharedModels")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

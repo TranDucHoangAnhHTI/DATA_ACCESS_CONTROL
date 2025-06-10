@@ -14,37 +14,6 @@
         Background="#F5F5F5">
     <Window.Resources>
         <local:DateTimeConverter x:Key="DateTimeConverter"/>
-        <Style TargetType="Button">
-            <Setter Property="Background"
-                    Value="#007ACC"/>
-            <Setter Property="Foreground"
-                    Value="White"/>
-            <Setter Property="Padding"
-                    Value="15,5"/>
-            <Setter Property="BorderThickness"
-                    Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver"
-                                    Value="True">
-                                <Setter Property="Background"
-                                        Value="#005999"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
 
     <Grid Margin="10">
@@ -209,32 +178,53 @@
             </ComboBox>
 
             <!-- Lọc theo thời gian -->
-            <ComboBox x:Name="TimeFilterCombo"
-                      Grid.Column="3"
-                      Margin="0,0,10,0"
-                      Width="150"
-                      ToolTip="Lọc theo thời gian"
-                      SelectionChanged="TimeFilterCombo_SelectionChanged">
-                <ComboBoxItem Content="Tất cả thời gian" Tag="all"/>
-                <ComboBoxItem Content="Hôm nay" Tag="today"/>
-                <ComboBoxItem Content="Hôm qua" Tag="yesterday"/>
-                <ComboBoxItem Content="Tuần này" Tag="thisweek"/>
-                <ComboBoxItem Content="Tháng này" Tag="thismonth"/>
-            </ComboBox>
+            <Grid Grid.Column="3" Margin="0,0,10,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <DatePicker x:Name="StartDatePicker"
+                          Width="120"
+                          ToolTip="Chọn ngày bắt đầu"
+                          SelectedDateChanged="DatePicker_SelectedDateChanged"/>
+                <TextBlock Grid.Column="1" 
+                         Text="đến" 
+                         Margin="5,0"
+                         VerticalAlignment="Center"/>
+                <DatePicker x:Name="EndDatePicker"
+                          Grid.Column="2"
+                          Width="120"
+                          ToolTip="Chọn ngày kết thúc"
+                          SelectedDateChanged="DatePicker_SelectedDateChanged"/>
+            </Grid>
 
             <!-- Các nút chức năng -->
             <StackPanel Grid.Column="4" Orientation="Horizontal">
-                <Button x:Name="RefreshButton" Click="RefreshButton_Click" ToolTip="Làm mới danh sách" Margin="0,0,5,0">
-                    <Path Data="M4,12 A8,8 0 1,1 12,20 A8,8 0 1,1 4,12 M12,4 L12,1 M12,23 L12,20 M20,12 L23,12 M1,12 L4,12" 
-                          Stroke="White" StrokeThickness="2" Width="16" Height="16"/>
+                <Button x:Name="RefreshButton" 
+                        Click="RefreshButton_Click" 
+                        ToolTip="Làm mới danh sách" 
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Margin="0,0,5,0">
+                    <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4c-4.42,0 -7.99,3.58 -7.99,8s3.57,8 7.99,8c3.73,0 6.84,-2.55 7.73,-6h-2.08c-0.82,2.33 -3.04,4 -5.65,4 -3.31,0 -6,-2.69 -6,-6s2.69,-6 6,-6c1.66,0 3.14,0.69 4.22,1.78L13,11h7V4l-2.35,2.35z" 
+                          Fill="#2196F3" Width="20" Height="20"/>
                 </Button>
-                <Button x:Name="ExportPdfButton" Click="ExportPdfButton_Click" ToolTip="Xuất PDF" Margin="0,0,5,0">
-                    <Path Data="M19,9H15V3H9V9H5L12,16L19,9M5,18V20H19V18H5Z" 
-                          Fill="White" Width="16" Height="16"/>
+                <Button x:Name="ExportPdfButton" 
+                        Click="ExportPdfButton_Click" 
+                        ToolTip="Xuất báo cáo PDF" 
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Margin="0,0,5,0">
+                    <Path Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M16,11V18.1L13.9,16L11.1,18.8L8.3,16L11.1,13.2L8.9,11H16M12.9,14.9L14.3,16.3L11.5,19.1L10.1,17.7L12.9,14.9Z" 
+                          Fill="#4CAF50" Width="20" Height="20"/>
                 </Button>
-                <Button x:Name="ClearFiltersButton" Click="ClearFilters_Click" ToolTip="Xóa bộ lọc">
-                    <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" 
-                          Fill="White" Width="16" Height="16"/>
+                <Button x:Name="ClearFiltersButton" 
+                        Click="ClearFilters_Click" 
+                        ToolTip="Xóa tất cả bộ lọc"
+                        Background="Transparent"
+                        BorderThickness="0">
+                    <Path Data="M19.36,2.72L20.78,4.14L15.06,9.85C16.13,11.39 16.28,13.24 15.38,14.44L9.06,8.12C10.26,7.22 12.11,7.37 13.65,8.44L19.36,2.72M5.93,17.57C3.92,15.56 2.69,13.16 2.35,10.92L7.23,8.83L14.67,16.27L12.58,21.15C10.34,20.81 7.94,19.58 5.93,17.57Z" 
+                          Fill="#FF9800" Width="20" Height="20"/>
                 </Button>
             </StackPanel>
         </Grid>
@@ -250,8 +240,7 @@
                       BorderThickness="0">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="Thời gian"
-                                Width="150">
+                        <GridViewColumn Header="Thời gian" Width="150">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock>
@@ -265,8 +254,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Loại"
-                                Width="100">
+                        <GridViewColumn Header="Loại" Width="100">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Type}">
@@ -300,22 +288,20 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Đường dẫn"
-                                Width="400">
+                        <GridViewColumn Header="Đường dẫn" Width="400">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding FilePath}"
-                                            TextTrimming="CharacterEllipsis"/>
+                                             TextTrimming="CharacterEllipsis"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Đường dẫn cũ"
-                                Width="200">
+                        <GridViewColumn Header="Đường dẫn cũ" Width="200">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding OldFilePath}"
-                                               TextTrimming="CharacterEllipsis"
-                                               Foreground="#666666">
+                                             TextTrimming="CharacterEllipsis"
+                                             Foreground="#666666">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Style.Triggers>
@@ -331,12 +317,11 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Ổ đĩa"
-                                Width="80">
+                        <GridViewColumn Header="Ổ đĩa" Width="80">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Drive}"
-                                            HorizontalAlignment="Center"/>
+                                             HorizontalAlignment="Center"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
